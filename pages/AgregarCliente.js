@@ -63,7 +63,11 @@ const styles = StyleSheet.create({
   tabBar: {
     flex: 1,
     backgroundColor: '#fff',
-    boxShadow: 'none',
+    elevation: 0, // Android
+    shadowColor: 'transparent', // iOS
+    shadowOpacity: 0,
+    shadowOffset: { width: 0, height: 0 },
+    shadowRadius: 0,
   },
   indicator: {
     backgroundColor: '#007bff',

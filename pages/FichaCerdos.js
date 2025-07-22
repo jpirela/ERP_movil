@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import CheckBox from '../components/CheckBox';
-import InputText from '../components/InputText';
+import CheckBox from '../components/Input/CheckBox';
+import InputText from '../components/Input/InputText';
 
 const cortes = [
   'Pernil',
