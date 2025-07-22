@@ -4,16 +4,16 @@ import { MaterialCommunityIcons, MaterialIcons } from '@expo/vector-icons';
 
 // Ejemplo de datos de clientes
 const clientes = [
-    { id: 1, nombre: 'Verduritas Sabrosas, S.R.L.' },
-    { id: 2, nombre: 'Carnita Rica y Divina, C.A.' },
-    { id: 3, nombre: 'Bodegas Unidas' },
+    { idCliente: 1, nombre: 'Verduritas Sabrosas, S.R.L.' },
+    { idCliente: 2, nombre: 'Carnita Rica y Divina, C.A.' },
+    { idCliente: 3, nombre: 'Bodegas Unidas' },
 ];
 
 // Iconos referenciados en App.js (ajusta según tu App.js)
 const icons = {
     cliente: <MaterialCommunityIcons name="account-circle" size={24} color="gray" />,
-    cerdos: <MaterialCommunityIcons name="pig" size={24} color="gray" />,
-    carnes: <MaterialCommunityIcons name="food-turkey" size={24} color="gray" />,
+//    cerdos: <MaterialCommunityIcons name="pig" size={24} color="gray" />,
+//    carnes: <MaterialCommunityIcons name="food-turkey" size={24} color="gray" />,
     huevos: <MaterialCommunityIcons name="egg" size={24} color="gray" />,
 };
 
@@ -26,18 +26,20 @@ const Inicio = () => {
                     <Text style={[styles.cell, styles.headerCell, { width: '25%' }]}>Acciones</Text>
                 </View>
                 {clientes.map(cliente => (
-                    <View key={cliente.id} style={styles.row}>
+                    <View key={cliente.idCliente} style={styles.row}>
                         <Text style={[styles.cell, { width: '25%' }]}>{cliente.nombre}</Text>
                         <View style={[styles.actionsCell, { flex: 1 }]}>
                             <TouchableOpacity style={styles.actionBtn}>
                                 {icons.cliente}
                             </TouchableOpacity>
+                            {/*}
                             <TouchableOpacity style={styles.actionBtn}>
                                 {icons.cerdos}
                             </TouchableOpacity>
                             <TouchableOpacity style={styles.actionBtn}>
                                 {icons.carnes}
                             </TouchableOpacity>
+                            */}
                             <TouchableOpacity style={styles.actionBtn}>
                                 {icons.huevos}
                             </TouchableOpacity>

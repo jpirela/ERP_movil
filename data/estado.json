@@ -1,0 +1,106 @@
+{
+	"table": "estado",
+	"rows":
+	[
+		{
+			"id_estado": 1,
+			"nombre": "Amazonas"
+		},
+		{
+			"id_estado": 2,
+			"nombre": "Anzoátegui"
+		},
+		{
+			"id_estado": 3,
+			"nombre": "Apure"
+		},
+		{
+			"id_estado": 4,
+			"nombre": "Aragua"
+		},
+		{
+			"id_estado": 5,
+			"nombre": "Barinas"
+		},
+		{
+			"id_estado": 6,
+			"nombre": "Bolívar"
+		},
+		{
+			"id_estado": 7,
+			"nombre": "Carabobo"
+		},
+		{
+			"id_estado": 8,
+			"nombre": "Cojedes"
+		},
+		{
+			"id_estado": 9,
+			"nombre": "Delta Amacuro"
+		},
+		{
+			"id_estado": 10,
+			"nombre": "Falcón"
+		},
+		{
+			"id_estado": 11,
+			"nombre": "Guárico"
+		},
+		{
+			"id_estado": 12,
+			"nombre": "Lara"
+		},
+		{
+			"id_estado": 13,
+			"nombre": "Mérida"
+		},
+		{
+			"id_estado": 14,
+			"nombre": "Miranda"
+		},
+		{
+			"id_estado": 15,
+			"nombre": "Monagas"
+		},
+		{
+			"id_estado": 16,
+			"nombre": "Nueva Esparta"
+		},
+		{
+			"id_estado": 17,
+			"nombre": "Portuguesa"
+		},
+		{
+			"id_estado": 18,
+			"nombre": "Sucre"
+		},
+		{
+			"id_estado": 19,
+			"nombre": "Táchira"
+		},
+		{
+			"id_estado": 20,
+			"nombre": "Trujillo"
+		},
+		{
+			"id_estado": 21,
+			"nombre": "La Guaira"
+		},
+		{
+			"id_estado": 22,
+			"nombre": "Yaracuy"
+		},
+		{
+			"id_estado": 23,
+			"nombre": "Zulia"
+		},
+		{
+			"id_estado": 24,
+			"nombre": "Distrito Capital"
+		},
+		{
+			"id_estado": 25,
+			"nombre": "Dependencias Federales"
+		}
+	]
+}

@@ -12,7 +12,7 @@ const Tab = createBottomTabNavigator();
 const CustomHeader = ({ title }) => (
   <View style={styles.headerContainer}>
     <View style={styles.leftCell}>
-      <Image source={require('./assets/logo.png')} style={styles.logo} />
+      <Image source={require('./assets/logo.png')} style={styles.logo} resizeMode='contain' />
     </View>
   </View>
 );
@@ -53,6 +53,5 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 50,
-    resizeMode: 'contain',
   },
 });

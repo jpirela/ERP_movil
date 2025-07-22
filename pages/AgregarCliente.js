@@ -28,9 +28,11 @@ export default function AgregarCliente() {
     <View style={styles.tabHeader}>
       <TabBar
         {...props}
-        style={styles.tabBar}
         indicatorStyle={styles.indicator}
+        style={styles.tabBar}
         labelStyle={styles.label}
+        activeColor="#007bff"
+        inactiveColor="#666"
       />
       <TouchableOpacity style={styles.saveButton} onPress={handleGuardar}>
         <Text style={styles.saveButtonText}>Guardar</Text>
@@ -61,14 +63,14 @@ const styles = StyleSheet.create({
   tabBar: {
     flex: 1,
     backgroundColor: '#fff',
-    elevation: 0,
+    boxShadow: 'none',
   },
   indicator: {
     backgroundColor: '#007bff',
     height: 3,
   },
   label: {
-    color: '#333',
+    color: '#000000',
     fontWeight: 'bold',
   },
   saveButton: {

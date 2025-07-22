@@ -1,0 +1,14 @@
+{
+	"table": "condicion_pago",
+	"rows":
+	[
+		{
+			"id_condicion_pago": 1,
+			"descripcion": "Crédito"
+		},
+		{
+			"id_condicion_pago": 2,
+			"descripcion": "Contado"
+		}
+	]
+}

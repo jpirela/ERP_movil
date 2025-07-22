@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { ScrollView, View, Text, StyleSheet } from 'react-native';
-import InputText from '../components/InputText';
-import CheckBox from '../components/CheckBox';
+import InputText from '../components/Input/InputText';
+import CheckBox from '../components/Input/CheckBox';
 
 const tiposHuevos = [
   { tipo: 'Extra grande', detalle: 'Jumbo > 78g' },
