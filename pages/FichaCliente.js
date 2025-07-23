@@ -5,8 +5,6 @@ import { StatusBar } from 'expo-status-bar';
 import InputText from '../components/Input/InputText';
 import TextArea from '../components/Input/TextArea';
 import SelectBox from '../components/Input/SelectBox';
-import condicion_pago from '../data/condicion_pago.json';
-import forma_pago from '../data/forma_pago.json';
 import ciudades from '../data/ciudades.json';
 import estado from '../data/estado.json';
 import municipio from '../data/municipio.json';
@@ -67,16 +65,14 @@ export default function Cliente() {
       <InputText id="puntoReferencia" value={object.puntoReferencia} placeholder="Punto de referencia" onChange={updateFormValue} />
       <InputText id="diaRecepcion" value={object.diaRecepcion} placeholder="Día de recepción" onChange={updateFormValue} />
       <InputText id="tipoComercio" value={object.tipoComercio} placeholder="Tipo de comercio" onChange={updateFormValue} />
-      <SelectBox id="formaPago" value={object.formaPago} labelTitle="Forma de pago" onChange={updateFormValue} options={forma_pago} />
-      <SelectBox id="condicionPago" value={object.condicionPago} labelTitle="Condición de pago" onChange={updateFormValue} options={condicion_pago} />
       <InputText id="facebook" value={object.facebook} placeholder="Facebook" onChange={updateFormValue} />
       <InputText id="instagram" value={object.instagram} placeholder="Instagram" onChange={updateFormValue} />
       <InputText id="tiktok" value={object.tiktok} placeholder="Tiktok" onChange={updateFormValue} />
       <InputText id="paginaWeb" value={object.paginaWeb} placeholder="Página web" onChange={updateFormValue} />
-      <SelectBox id="estado" value={object.estado} labelTitle="Estado" onChange={updateFormValue} options={estado} />
-      <SelectBox id="municipio" value={object.municipio} labelTitle="Municipio" onChange={updateFormValue} options={municipio} />
-      <SelectBox id="parroquia" value={object.parroquia} labelTitle="Parroquia" onChange={updateFormValue} options={parroquia} />
-      <SelectBox id="ciudad" value={object.ciudad} labelTitle="Ciudad" onChange={updateFormValue} options={ciudades} />
+      <SelectBox id="estado" value={object.estado} labelTitle="Estado" onChange={updateFormValue} options={estado.rows} />
+      <SelectBox id="municipio" value={object.municipio} labelTitle="Municipio" onChange={updateFormValue} options={municipio.rows} />
+      <SelectBox id="parroquia" value={object.parroquia} labelTitle="Parroquia" onChange={updateFormValue} options={parroquia.rows} />
+      <SelectBox id="ciudad" value={object.ciudad} labelTitle="Ciudad" onChange={updateFormValue} options={ciudades.rows} />
       <StatusBar style="auto" />
     </ScrollView>
   );
