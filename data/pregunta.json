@@ -1,32 +1,36 @@
 { "table": "pregunta" ,
-  "rows": [
-		{ "id_pregunta": 1, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Extra grande? (Jumbo > 78gr)" },
-		{ "id_pregunta": 2, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Mas grande? (AAA > 70gr < 78gr)" },
-		{ "id_pregunta": 3, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Grande? (AA > 65gr < 70gr )" },
-		{ "id_pregunta": 4, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Medianos? (A > 56gr < 65gr)" },
-		{ "id_pregunta": 5, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Pequeño? (B > 46gr < 56gr)" },
-		{ "id_pregunta": 6, "tipo": "text", "descripcion": "¿Cuántas cajas/compra Tamaño Pigüi? (C < 48 gr)" },
-		{ "id_pregunta": 7, "tipo": "text", "descripcion": "¿Donde compra las cajas de huevos?" },
-		{ "id_pregunta": 8, "tipo": "text", "descripcion": "¿Cuantos proveedores de huevos tiene?" },
-		{ "id_pregunta": 9, "tipo": "text", "descripcion": "¿Cual es su proveedor de confianza?" },
-		{ "id_pregunta": 10, "tipo": "text", "descripcion": "¿Usted busca los huevos o se los traen?" },
-		{ 
-			"id_pregunta": 11, 
-			"tipo": "select", 
-			"descripcion": "¿Paga flete?", 
+  "rows":
+  	[
+		{ "id_pregunta": 1, "descripcion": "¿Cuántas cajas compra?", "tipo": "text" },
+		{ "id_pregunta": 2, "descripcion": "¿Cuál es el tamaño que compra?", "tipo": "select", 
+			"options": [
+				{ "id": 1, "nombre": "Extra grande (Jumbo > 78gr)" },
+				{ "id": 2, "nombre": "Mas grande (AAA > 70gr < 78gr)" },
+				{ "id": 3, "nombre": "Grande (AA > 65gr < 70gr)" },
+				{ "id": 4, "nombre": "Mediano (A > 56gr < 65gr)" },
+				{ "id": 5, "nombre": "Pigüi (C < 48 gr)" }
+			]
+		},
+		{ "id_pregunta": 6, "descripcion": "¿Donde compra las cajas de huevos?", "tipo": "text" },
+		{ "id_pregunta": 7, "descripcion": "¿Cuantos proveedores de huevos tiene?", "tipo": "text" },
+		{ "id_pregunta": 8, "descripcion": "¿Cual es su proveedor de confianza?", "tipo": "text" },
+		{ "id_pregunta": 9, "descripcion": "¿Usted busca los huevos o se los traen?", "tipo": "text" },
+		{ "id_pregunta": 10, "descripcion": "¿Paga flete?", "tipo": "select", 
 			"options": [
 				{ "id": 1, "nombre": "Sí" },
 				{ "id": 2, "nombre": "No" }
 			]
 		},
-		{ "id_pregunta": 12, "tipo": "text", "descripcion": "¿Cuanto paga de flete?" },
-		{ "id_pregunta": 13, "tipo": "select", "descripcion": "¿Estaria dispuesto a darnos la oportunidad de ser su proveedor de huevos?", "options": [ { "id": 1, "nombre": "Sí" }, { "id": 2, "nombre": "No" } ] },
-		{ "id_pregunta": 14, "tipo": "select", "descripcion": "¿Cual es su forma de pago?", "options": "formaPago.rows" },
-		{ "id_pregunta": 15, "tipo": "select", "descripcion": "¿Cual es su CONDICIÓN DE PAGO?", "options": "condicionPago.rows" },
-		{ 
-			"id_pregunta": 16, 
-			"tipo": "select", 
-			"descripcion": "Días de Recepción de Mercancía", 
+		{ "id_pregunta": 11, "descripcion": "¿Cuanto paga de flete?", "tipo": "text" },
+		{ "id_pregunta": 12, "descripcion": "¿Estaria dispuesto a darnos la oportunidad de ser su proveedor de huevos?", "tipo": "select", 
+			"options": [
+				{ "id": 1, "nombre": "Sí" },
+				{ "id": 2, "nombre": "No" }
+			]
+		},
+		{ "id_pregunta": 13, "descripcion": "¿Cual es su forma de pago?", "tipo": "select", "options": "formaPago" },
+		{ "id_pregunta": 14, "descripcion": "¿Cual es su CONDICIÓN DE PAGO?", "tipo": "select", "options": "condicionPago" },
+		{ "id_pregunta": 15, "descripcion": "Días de Recepción de Mercancía", "tipo": "select",
 			"options": [
 				{ "id": 1, "nombre": "Lunes" },
 				{ "id": 2, "nombre": "Martes" },

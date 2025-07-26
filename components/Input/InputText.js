@@ -1,8 +1,18 @@
 import React from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
-const InputText = ({ id, labelTitle, value, placeholder, onChange, type = 'text' }) => {
+const InputText = ({
+  id,
+  labelTitle,
+  value,
+  placeholder,
+  onChange,
+  type = 'text',
+  labelPosition = 'top', // "top" o "left"
+  hasError = false,
+}) => {
   const getSecureEntry = () => type === 'password';
+
   const getKeyboardType = () => {
     switch (type) {
       case 'email':
@@ -17,11 +27,32 @@ const InputText = ({ id, labelTitle, value, placeholder, onChange, type = 'text'
     }
   };
 
+  const isLeft = labelPosition === 'left';
+
   return (
-    <View style={styles.container}>
-      {labelTitle ? <Text style={styles.label}>{labelTitle}</Text> : null}
+    <View
+      style={[
+        styles.container,
+        isLeft ? styles.leftAlign : styles.topAlign,
+      ]}
+    >
+      {labelTitle ? (
+        <Text
+          style={[
+            styles.label,
+            isLeft ? styles.labelLeft : styles.labelTop,
+            hasError && styles.errorText,
+          ]}
+        >
+          {labelTitle}
+        </Text>
+      ) : null}
       <TextInput
-        style={styles.input}
+        style={[
+          styles.input,
+          isLeft ? styles.inputLeft : styles.inputTop,
+          hasError && styles.errorBorder,
+        ]}
         value={value}
         placeholder={placeholder}
         secureTextEntry={getSecureEntry()}
@@ -29,7 +60,6 @@ const InputText = ({ id, labelTitle, value, placeholder, onChange, type = 'text'
         onChangeText={(text) => onChange(id, text)}
         autoCapitalize="none"
         autoCorrect={false}
-        id={id}
       />
     </View>
   );
@@ -38,8 +68,29 @@ const InputText = ({ id, labelTitle, value, placeholder, onChange, type = 'text'
 export default InputText;
 
 const styles = StyleSheet.create({
-  container: { marginBottom: 16 },
-  label: { marginBottom: 4, fontWeight: 'bold', color: '#333' },
+  container: {
+    marginBottom: 16,
+    alignItems: 'flex-start',
+  },
+  topAlign: {
+    flexDirection: 'column',
+  },
+  leftAlign: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  label: {
+    fontWeight: 'bold',
+    color: '#333',
+  },
+  labelTop: {
+    marginBottom: 4,
+    width: '100%',
+  },
+  labelLeft: {
+    marginRight: 12,
+    width: 80,
+  },
   input: {
     borderWidth: 1,
     borderColor: '#ccc',
@@ -47,5 +98,17 @@ const styles = StyleSheet.create({
     borderRadius: 4,
     fontSize: 16,
     backgroundColor: '#fff',
+  },
+  inputTop: {
+    width: '100%',
+  },
+  inputLeft: {
+    flex: 1,
+  },
+  errorText: {
+    color: 'red',
+  },
+  errorBorder: {
+    borderColor: 'red',
   },
 });

@@ -1,11 +1,10 @@
-// pages/FichaHuevos.js
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { ScrollView, StyleSheet } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
-
 import InputText from '../components/Input/InputText';
 import SelectBox from '../components/Input/SelectBox';
 import preguntasData from '../data/pregunta.json';
+
 import formaPago from '../data/forma_pago.json';
 import condicionPago from '../data/condicion_pago.json';
 
