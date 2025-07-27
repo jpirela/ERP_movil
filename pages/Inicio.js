@@ -43,6 +43,10 @@ const Inicio = () => {
         );
     }, [searchText]);
 
+    const handleAgregarCliente = () => {
+        navigation.navigate('AgregarCliente');
+    };
+
     return (
         <View style={styles.container}>
 
@@ -54,6 +58,9 @@ const Inicio = () => {
                     value={searchText}
                     onChangeText={setSearchText}
                 />
+                <TouchableOpacity style={styles.addButton} onPress={handleAgregarCliente}>
+                    <Text style={styles.addButtonText}>Agregar</Text>
+                </TouchableOpacity>
             </View>
 
             {/* Encabezado de tabla */}
@@ -93,14 +100,6 @@ const styles = StyleSheet.create({
         backgroundColor: '#fff',
         paddingHorizontal: 16,
         paddingTop: 16,
-    },
-    header: {
-        alignItems: 'center',
-        marginBottom: 10,
-    },
-    logo: {
-        fontSize: 16,
-        fontWeight: 'bold',
     },
     searchContainer: {
         flexDirection: 'row',
