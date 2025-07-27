@@ -1,43 +1,31 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { createStackNavigator } from '@react-navigation/stack';
 import Inicio from './pages/Inicio';
 import AgregarCliente from './pages/AgregarCliente';
-import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { View, Image, StyleSheet } from 'react-native';
 
-const Tab = createBottomTabNavigator();
+const Stack = createStackNavigator();
 
 // ✅ Encabezado personalizado
 const CustomHeader = ({ title }) => (
   <View style={styles.headerContainer}>
-    <View style={styles.leftCell}>
-      <Image source={require('./assets/logo.png')} style={styles.logo} resizeMode='contain' />
-    </View>
+    <Image source={require('./assets/logo.png')} style={styles.logo} resizeMode='contain' />
   </View>
 );
 
 export default function App() {
   return (
     <NavigationContainer>
-      <Tab.Navigator
-        initialRouteName="Inicio" // ✅ Aquí se define la pantalla inicial
-        screenOptions={({ route }) => ({
-          headerTitle: () => <CustomHeader title={route.name} />,
-          tabBarIcon: ({ color, size }) => {
-            let iconName;
-            if (route.name === 'Inicio') iconName = 'home';
-            else if (route.name === 'Agregar Cliente') iconName = 'account-plus-outline';
-
-            return <MaterialCommunityIcons name={iconName} size={size} color={color} />;
-          },
-          tabBarActiveTintColor: '#e91e63',
-          tabBarInactiveTintColor: 'gray',
-        })}
+      <Stack.Navigator
+        initialRouteName="Inicio"
+        screenOptions={{
+          headerTitle: (props) => <CustomHeader {...props} />,
+        }}
       >
-        <Tab.Screen name="Inicio" component={Inicio} />
-        <Tab.Screen name="Agregar Cliente" component={AgregarCliente} />
-      </Tab.Navigator>
+        <Stack.Screen name="Inicio" component={Inicio} />
+        <Stack.Screen name="AgregarCliente" component={AgregarCliente} />
+      </Stack.Navigator>
     </NavigationContainer>
   );
 }
@@ -46,8 +34,7 @@ const styles = StyleSheet.create({
   headerContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-    paddingHorizontal: 0,
+    justifyContent: 'center',
     width: '100%',
   },
   logo: {

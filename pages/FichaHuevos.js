@@ -1,6 +1,11 @@
-// pages/FichaHuevos.js
 import { useState } from 'react';
-import { ScrollView, StyleSheet } from 'react-native';
+import {
+  ScrollView,
+  StyleSheet,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import InputText from '../components/Input/InputText';
@@ -17,7 +22,6 @@ const opcionesExternas = {
 export default function FichaHuevos() {
   const preguntas = preguntasData.rows;
 
-  // Usar id_pregunta para construir el estado inicial
   const INITIAL_OBJECT = preguntas.reduce((acc, pregunta) => {
     acc[pregunta.id_pregunta] = '';
     return acc;
@@ -37,7 +41,7 @@ export default function FichaHuevos() {
       id_pregunta: id,
       tipo: type,
       descripcion: labelTitle,
-      options: options,
+      options,
     } = pregunta;
 
     if (type === 'select') {
@@ -76,18 +80,30 @@ export default function FichaHuevos() {
   };
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
-      {preguntas.map(renderPregunta)}
-      <StatusBar style="auto" />
-    </ScrollView>
+    <KeyboardAvoidingView
+      style={styles.flex}
+      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+    >
+      <ScrollView
+        contentContainerStyle={styles.container}
+        showsVerticalScrollIndicator={true}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View>{preguntas.map(renderPregunta)}</View>
+        <StatusBar style="auto" />
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    paddingTop: 20,
-    paddingHorizontal: 20,
-    flexGrow: 1,
+  flex: {
+    flex: 1,
     backgroundColor: '#fff',
+  },
+  container: {
+    padding: 20,
+    paddingBottom: 60,
   },
 });

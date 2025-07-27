@@ -1,7 +1,6 @@
-// pages/AgregarCliente.js
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { View, useWindowDimensions, StyleSheet, Text, TouchableOpacity } from 'react-native';
-import { TabView, SceneMap, TabBar } from 'react-native-tab-view';
+import { TabView, TabBar } from 'react-native-tab-view';
 import FichaCliente from './FichaCliente';
 import FichaHuevos from './FichaHuevos';
 
@@ -13,15 +12,19 @@ export default function AgregarCliente() {
     { key: 'huevos', title: 'Ficha Huevos' },
   ]);
 
-  const renderScene = SceneMap({
-    cliente: FichaCliente,
-    huevos: FichaHuevos,
-  });
+  const renderScene = ({ route }) => {
+    switch (route.key) {
+      case 'cliente':
+        return <FichaCliente />;
+      case 'huevos':
+        return <FichaHuevos />;
+      default:
+        return null;
+    }
+  };
 
   const handleGuardar = () => {
-    // Aquí puedes agregar lógica para guardar datos combinados de ambas fichas
     console.log('Guardar presionado');
-    // Ejemplo: recolectar datos vía contexto, props o estado global
   };
 
   const renderTabBar = (props) => (
@@ -48,6 +51,7 @@ export default function AgregarCliente() {
         onIndexChange={setIndex}
         initialLayout={{ width: layout.width }}
         renderTabBar={renderTabBar}
+        style={{ flex: 1 }}
       />
     </View>
   );
@@ -63,18 +67,14 @@ const styles = StyleSheet.create({
   tabBar: {
     flex: 1,
     backgroundColor: '#fff',
-    elevation: 0, // Android
-    shadowColor: 'transparent', // iOS
-    shadowOpacity: 0,
-    shadowOffset: { width: 0, height: 0 },
-    shadowRadius: 0,
+    elevation: 0,
   },
   indicator: {
     backgroundColor: '#007bff',
     height: 3,
   },
   label: {
-    color: '#000000',
+    color: '#000',
     fontWeight: 'bold',
   },
   saveButton: {
