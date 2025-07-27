@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, Text, StyleSheet } from 'react-native';
+import { View, Text, StyleSheet, Platform } from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 export default function SelectBox({
@@ -10,7 +10,7 @@ export default function SelectBox({
   onChange,
   labelPosition = 'top', // "top" o "left"
   hasError = false,
-  enabled = true, // nuevo
+  enabled = true,
 }) {
   const dataArray = Array.isArray(options)
     ? options
@@ -50,8 +50,9 @@ export default function SelectBox({
         <Picker
           selectedValue={value?.toString() ?? ''}
           onValueChange={handleChange}
-          style={styles.picker}
           enabled={enabled}
+          style={styles.picker}
+          dropdownIconColor="#333"
         >
           <Picker.Item
             label="Seleccionar opción"
@@ -108,6 +109,8 @@ const styles = StyleSheet.create({
     borderColor: '#ccc',
     borderRadius: 4,
     backgroundColor: '#fff',
+    height: 48,
+    justifyContent: 'center',
   },
   pickerTop: {
     width: '100%',
@@ -116,7 +119,18 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   picker: {
-    height: 48,
+    width: '100%',
+    color: '#000',
+    paddingLeft: Platform.OS === 'android' ? 4 : 0,
+    ...Platform.select({
+      android: {
+        marginTop: -4, // Alineación vertical visual
+      },
+      ios: {
+        // opcionalmente puedes ajustar fontSize
+        fontSize: 16,
+      },
+    }),
   },
   errorText: {
     color: 'red',
