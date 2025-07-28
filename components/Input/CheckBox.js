@@ -29,10 +29,11 @@ export default function CheckBox({
           {labelTitle}
         </Text>
       ) : null}
+
       <Switch
         value={value}
         onValueChange={(val) => onChange(id, val)}
-        style={styles.switch}
+        style={isLeft ? styles.switchLeft : styles.switchTop}
       />
     </View>
   );
@@ -45,6 +46,7 @@ const styles = StyleSheet.create({
   },
   topAlign: {
     flexDirection: 'column',
+    alignItems: 'flex-start',
   },
   leftAlign: {
     flexDirection: 'row',
@@ -56,14 +58,15 @@ const styles = StyleSheet.create({
   },
   labelTop: {
     marginBottom: 4,
-    width: '100%',
   },
   labelLeft: {
     marginRight: 12,
-    width: 80,
   },
-  switch: {
-    // Puedes ajustar tamaño o margen si deseas
+  switchTop: {
+    alignSelf: 'flex-start',
+  },
+  switchLeft: {
+    flex: 1,
   },
   errorText: {
     color: 'red',

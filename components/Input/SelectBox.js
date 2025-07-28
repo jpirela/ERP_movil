@@ -1,5 +1,11 @@
-import React from 'react';
-import { View, Text, StyleSheet, Platform } from 'react-native';
+import React, { useRef } from 'react';
+import {
+  View,
+  Text,
+  StyleSheet,
+  Platform,
+  TouchableWithoutFeedback,
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
 
 export default function SelectBox({
@@ -12,6 +18,8 @@ export default function SelectBox({
   hasError = false,
   enabled = true,
 }) {
+  const pickerRef = useRef();
+
   const dataArray = Array.isArray(options)
     ? options
     : options && typeof options === 'object'
@@ -23,6 +31,12 @@ export default function SelectBox({
   const handleChange = (itemValue) => {
     if (onChange) {
       onChange(id, itemValue);
+    }
+  };
+
+  const handlePress = () => {
+    if (pickerRef.current && Platform.OS === 'android') {
+      pickerRef.current.focus();
     }
   };
 
@@ -40,42 +54,45 @@ export default function SelectBox({
         </Text>
       ) : null}
 
-      <View
-        style={[
-          styles.pickerWrapper,
-          isLeft ? styles.pickerLeft : styles.pickerTop,
-          hasError && styles.errorBorder,
-        ]}
-      >
-        <Picker
-          selectedValue={value?.toString() ?? ''}
-          onValueChange={handleChange}
-          enabled={enabled}
-          style={styles.picker}
-          dropdownIconColor="#333"
+      <TouchableWithoutFeedback onPress={handlePress} disabled={!enabled}>
+        <View
+          style={[
+            styles.pickerWrapper,
+            isLeft ? styles.pickerLeft : styles.pickerTop,
+            hasError && styles.errorBorder,
+          ]}
         >
-          <Picker.Item
-            label="Seleccionar opción"
-            value=""
-            enabled={false}
-            key="placeholder"
-          />
+          <Picker
+            ref={pickerRef}
+            selectedValue={value?.toString() ?? ''}
+            onValueChange={handleChange}
+            enabled={enabled}
+            style={styles.picker}
+            dropdownIconColor="#333"
+          >
+            <Picker.Item
+              label="Seleccionar opción"
+              value=""
+              enabled={false}
+              key="placeholder"
+            />
 
-          {dataArray.map((o, index) => {
-            const itemId = (o.id || o.id_estado || o.value || index).toString();
-            const itemLabel = o.texto || o.nombre || o.label || `Item ${index + 1}`;
-            const uniqueKey = `${labelTitle || 'select'}-${itemId}-${index}`;
+            {dataArray.map((o, index) => {
+              const itemId = (o.id || o.id_estado || o.value || index).toString();
+              const itemLabel = o.texto || o.nombre || o.label || `Item ${index + 1}`;
+              const uniqueKey = `${labelTitle || 'select'}-${itemId}-${index}`;
 
-            return (
-              <Picker.Item
-                label={itemLabel}
-                value={itemId}
-                key={uniqueKey}
-              />
-            );
-          })}
-        </Picker>
-      </View>
+              return (
+                <Picker.Item
+                  label={itemLabel}
+                  value={itemId}
+                  key={uniqueKey}
+                />
+              );
+            })}
+          </Picker>
+        </View>
+      </TouchableWithoutFeedback>
     </View>
   );
 }
@@ -91,6 +108,7 @@ const styles = StyleSheet.create({
   leftAlign: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
   },
   label: {
     fontWeight: 'bold',
@@ -101,8 +119,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   labelLeft: {
-    marginRight: 12,
-    width: 80,
+    width: '30%',
+    marginRight: 8,
   },
   pickerWrapper: {
     borderWidth: 1,
@@ -116,7 +134,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   pickerLeft: {
-    flex: 1,
+    width: '70%',
   },
   picker: {
     width: '100%',
@@ -124,10 +142,9 @@ const styles = StyleSheet.create({
     paddingLeft: Platform.OS === 'android' ? 4 : 0,
     ...Platform.select({
       android: {
-        marginTop: -4, // Alineación vertical visual
+        marginTop: -4,
       },
       ios: {
-        // opcionalmente puedes ajustar fontSize
         fontSize: 16,
       },
     }),

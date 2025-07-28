@@ -4,23 +4,18 @@ import { View, Text, TextInput, StyleSheet } from 'react-native';
 export default function TextArea({
   id,
   labelTitle,
-  value,
+  value = '',
   placeholder,
   onChange,
   numberOfLines = 4,
-  labelPosition = 'top', // "top" o "left"
+  labelPosition = 'top', // 'top' o 'left'
   hasError = false,
 }) {
   const isLeft = labelPosition === 'left';
 
   return (
-    <View
-      style={[
-        styles.container,
-        isLeft ? styles.leftAlign : styles.topAlign,
-      ]}
-    >
-      {labelTitle ? (
+    <View style={[styles.container, isLeft ? styles.leftAlign : styles.topAlign]}>
+      {labelTitle && (
         <Text
           style={[
             styles.label,
@@ -30,7 +25,8 @@ export default function TextArea({
         >
           {labelTitle}
         </Text>
-      ) : null}
+      )}
+
       <TextInput
         style={[
           styles.textArea,
@@ -38,10 +34,10 @@ export default function TextArea({
           { height: numberOfLines * 24 },
           hasError && styles.errorBorder,
         ]}
-        value={value}
         placeholder={placeholder}
+        value={value}
         onChangeText={(text) => onChange(id, text)}
-        multiline={true}
+        multiline
         textAlignVertical="top"
       />
     </View>
