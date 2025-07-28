@@ -24,7 +24,7 @@ export default function AgregarCliente() {
   };
 
   const handleGuardar = () => {
-    console.log('Guardar presionado');
+    navigation.goBack();
   };
 
   const renderTabBar = (props) => (

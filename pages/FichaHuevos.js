@@ -10,42 +10,90 @@ import { StatusBar } from 'expo-status-bar';
 
 import InputText from '../components/Input/InputText';
 import SelectBox from '../components/Input/SelectBox';
+import Divider from '../components/Input/Divider';
 
 import preguntasData from '../data/pregunta.json';
-import categoriasData from '../data/categoria.json'; // ✅ Importamos categorías
+import categoriasData from '../data/categoria.json';
+import formaPagoData from '../data/forma_pago.json';
+import condicionPagoData from '../data/condicion_pago.json';
 
 export default function FichaHuevos() {
-  // ✅ Convertimos categorías a formato compatible
+  // 1. Transformar datos
   const categoriasTransformadas = categoriasData.rows.map((categoria) => ({
-    id_pregunta: `cat_${categoria.id_categoria}`, // Prefijo para evitar colisiones
+    id_pregunta: `cat_${categoria.id_categoria}`,
     tipo: 'text',
     descripcion: categoria.nombre + ' (' + categoria.descripcion + ')',
+    labelPosition: 'left',
   }));
 
-  // ✅ Concatenamos primero categorías, luego preguntas
-  const preguntas = [...categoriasTransformadas, ...preguntasData.rows];
+  const preguntasTransformadas = preguntasData.rows.map((pregunta) => ({
+    ...pregunta,
+    labelPosition: 'top',
+  }));
 
-  const INITIAL_OBJECT = preguntas.reduce((acc, pregunta) => {
-    acc[pregunta.id_pregunta] = '';
-    return acc;
-  }, {});
+  const formaPagoTransformada = formaPagoData.rows.map((item) => ({
+    id_pregunta: `forma_${item.id_forma_pago}`,
+    tipo: 'select',
+    descripcion: item.descripcion,
+    labelPosition: 'left',
+    options: [
+				{ id: 1, nombre: "Sí" },
+				{ id: 2, nombre: "No" }
+			]
+  }));
 
-  const [formData, setFormData] = useState(INITIAL_OBJECT);
+  const condicionPagoTransformada = condicionPagoData.rows.map((item) => ({
+    id_pregunta: `cond_${item.id_condicion_pago}`,
+    tipo: 'text',
+    descripcion: item.descripcion,
+    labelPosition: 'left',
+  }));
 
-  const updateFormValue = (id, value) => {
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
+  // 2. Estados independientes
+  const [categorias, setCategorias] = useState(
+    categoriasTransformadas.reduce((acc, item) => {
+      acc[item.id_pregunta] = '';
+      return acc;
+    }, {})
+  );
 
-  const renderPregunta = (pregunta) => {
+  const [preguntas, setPreguntas] = useState(
+    preguntasTransformadas.reduce((acc, item) => {
+      acc[item.id_pregunta] = '';
+      return acc;
+    }, {})
+  );
+
+  const [formaPago, setFormaPago] = useState(
+    formaPagoTransformada.reduce((acc, item) => {
+      acc[item.id_pregunta] = '';
+      return acc;
+    }, {})
+  );
+
+  const [condicionPago, setCondicionPago] = useState(
+    condicionPagoTransformada.reduce((acc, item) => {
+      acc[item.id_pregunta] = '';
+      return acc;
+    }, {})
+  );
+
+  // 3. Renderizador reutilizable
+  const renderPregunta = (pregunta, formData, updateFn) => {
     const {
       id_pregunta: id,
       tipo: type,
       descripcion: labelTitle,
       options,
+      labelPosition,
     } = pregunta;
+
+    const handleChange = (id, value) => {
+      updateFn((prev) => ({
+        ...prev,
+        [id]: value,
+      }));
+    };
 
     if (type === 'select') {
       const resolvedOptions = Array.isArray(options) ? options : [];
@@ -55,8 +103,9 @@ export default function FichaHuevos() {
           id={id}
           value={formData[id]}
           labelTitle={labelTitle}
-          onChange={updateFormValue}
+          onChange={handleChange}
           options={resolvedOptions}
+          labelPosition={labelPosition}
         />
       );
     }
@@ -68,8 +117,9 @@ export default function FichaHuevos() {
         value={formData[id]}
         labelTitle={labelTitle}
         placeholder=""
-        onChange={updateFormValue}
+        onChange={handleChange}
         type={type}
+        labelPosition={labelPosition}
       />
     );
   };
@@ -85,7 +135,26 @@ export default function FichaHuevos() {
         showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
       >
-        <View>{preguntas.map(renderPregunta)}</View>
+        <Divider text="Tipos de Huevo" containerStyle={{ marginVertical: 10 }} />
+        <View>
+          {categoriasTransformadas.map((p) => renderPregunta(p, categorias, setCategorias))}
+        </View>
+
+        <Divider text="Preguntas" containerStyle={{ marginVertical: 10 }} />
+        <View>
+          {preguntasTransformadas.map((p) => renderPregunta(p, preguntas, setPreguntas))}
+        </View>
+
+        <Divider text="Forma de Pago" containerStyle={{ marginVertical: 10 }} />
+        <View>
+          {formaPagoTransformada.map((p) => renderPregunta(p, formaPago, setFormaPago))}
+        </View>
+
+        <Divider text="Condición de Pago" containerStyle={{ marginVertical: 10 }} />
+        <View>
+          {condicionPagoTransformada.map((p) => renderPregunta(p, condicionPago, setCondicionPago))}
+        </View>
+
         <StatusBar style="auto" />
       </ScrollView>
     </KeyboardAvoidingView>
