@@ -10,17 +10,20 @@ import { StatusBar } from 'expo-status-bar';
 
 import InputText from '../components/Input/InputText';
 import SelectBox from '../components/Input/SelectBox';
-import preguntasData from '../data/pregunta.json';
-import formaPago from '../data/forma_pago.json';
-import condicionPago from '../data/condicion_pago.json';
 
-const opcionesExternas = {
-  formaPago,
-  condicionPago,
-};
+import preguntasData from '../data/pregunta.json';
+import categoriasData from '../data/categoria.json'; // ✅ Importamos categorías
 
 export default function FichaHuevos() {
-  const preguntas = preguntasData.rows;
+  // ✅ Convertimos categorías a formato compatible
+  const categoriasTransformadas = categoriasData.rows.map((categoria) => ({
+    id_pregunta: `cat_${categoria.id_categoria}`, // Prefijo para evitar colisiones
+    tipo: 'text',
+    descripcion: categoria.nombre + ' (' + categoria.descripcion + ')',
+  }));
+
+  // ✅ Concatenamos primero categorías, luego preguntas
+  const preguntas = [...categoriasTransformadas, ...preguntasData.rows];
 
   const INITIAL_OBJECT = preguntas.reduce((acc, pregunta) => {
     acc[pregunta.id_pregunta] = '';
@@ -45,15 +48,7 @@ export default function FichaHuevos() {
     } = pregunta;
 
     if (type === 'select') {
-      let resolvedOptions = [];
-
-      if (typeof options === 'string') {
-        const key = options.replace('.json', '');
-        resolvedOptions = opcionesExternas[key] || [];
-      } else if (Array.isArray(options) && options.length > 0) {
-        resolvedOptions = options;
-      }
-
+      const resolvedOptions = Array.isArray(options) ? options : [];
       return (
         <SelectBox
           key={id}

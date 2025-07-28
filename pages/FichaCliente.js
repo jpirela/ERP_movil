@@ -1,11 +1,5 @@
 import { useState } from 'react';
-import {
-  StyleSheet,
-  ScrollView,
-  KeyboardAvoidingView,
-  Platform,
-  View,
-} from 'react-native';
+import {StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import InputText from '../components/Input/InputText';

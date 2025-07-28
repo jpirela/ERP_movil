@@ -1,20 +1,12 @@
 import { useState, useMemo, useEffect } from 'react';
-import {
-  View,
-  Text,
-  TouchableOpacity,
-  StyleSheet,
-  ScrollView,
-  TextInput,
-  Platform,
-} from 'react-native';
+import {View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
 import clientesData from '../data/clientes.json'; // Ajusta la ruta si es necesario
 
 const icons = {
-  cliente: <MaterialCommunityIcons name="account-circle" size={24} color="gray" />,
-  huevos: <MaterialCommunityIcons name="egg" size={24} color="gray" />,
+  editar: <MaterialCommunityIcons name="account-edit-outline" size={24} color="gray" />,
+  eliminar: <MaterialCommunityIcons name="account-remove-outline" size={24} color="gray" />,
 };
 
 const Inicio = () => {
@@ -71,10 +63,10 @@ const Inicio = () => {
             <Text style={[styles.cell, { flex: 1 }]}>{cliente.nombre}</Text>
             <View style={[styles.actionsCell, { width: '25%' }]}>
               <TouchableOpacity style={styles.actionBtn}>
-                {icons.cliente}
+                {icons.editar}
               </TouchableOpacity>
               <TouchableOpacity style={styles.actionBtn}>
-                {icons.huevos}
+                {icons.eliminar}
               </TouchableOpacity>
             </View>
           </View>

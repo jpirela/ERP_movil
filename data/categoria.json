@@ -1,0 +1,31 @@
+{
+	"table": "categoria",
+	"rows":
+	[
+		{
+			"id_categoria": 1,
+			"descripcion": "Jumbo > 78gr",
+			"nombre": "Extra grande"
+		},
+		{
+			"id_categoria": 2,
+			"descripcion": "AAA > 70gr < 78gr",
+			"nombre": "Mas grande"
+		},
+		{
+			"id_categoria": 3,
+			"descripcion": "AA > 65gr < 70gr",
+			"nombre": "Grande"
+		},
+		{
+			"id_categoria": 4,
+			"descripcion": "A > 56gr < 65gr",
+			"nombre": "Medianos"
+		},
+		{
+			"id_categoria": 5,
+			"descripcion": "B > 46gr < 56gr",
+			"nombre": "Pequeño"
+		}
+	]
+}

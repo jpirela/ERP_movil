@@ -1,16 +1,6 @@
 { "table": "pregunta" ,
   "rows":
   	[
-		{ "id_pregunta": 1, "descripcion": "¿Cuántas cajas compra?", "tipo": "text" },
-		{ "id_pregunta": 2, "descripcion": "¿Cuál es el tamaño que compra?", "tipo": "select", 
-			"options": [
-				{ "id": 1, "nombre": "Extra grande (Jumbo > 78gr)" },
-				{ "id": 2, "nombre": "Mas grande (AAA > 70gr < 78gr)" },
-				{ "id": 3, "nombre": "Grande (AA > 65gr < 70gr)" },
-				{ "id": 4, "nombre": "Mediano (A > 56gr < 65gr)" },
-				{ "id": 5, "nombre": "Pigüi (C < 48 gr)" }
-			]
-		},
 		{ "id_pregunta": 6, "descripcion": "¿Donde compra las cajas de huevos?", "tipo": "text" },
 		{ "id_pregunta": 7, "descripcion": "¿Cuantos proveedores de huevos tiene?", "tipo": "text" },
 		{ "id_pregunta": 8, "descripcion": "¿Cual es su proveedor de confianza?", "tipo": "text" },
@@ -26,19 +16,6 @@
 			"options": [
 				{ "id": 1, "nombre": "Sí" },
 				{ "id": 2, "nombre": "No" }
-			]
-		},
-		{ "id_pregunta": 13, "descripcion": "¿Cual es su forma de pago?", "tipo": "select", "options": "formaPago" },
-		{ "id_pregunta": 14, "descripcion": "¿Cual es su CONDICIÓN DE PAGO?", "tipo": "select", "options": "condicionPago" },
-		{ "id_pregunta": 15, "descripcion": "Días de Recepción de Mercancía", "tipo": "select",
-			"options": [
-				{ "id": 1, "nombre": "Lunes" },
-				{ "id": 2, "nombre": "Martes" },
-				{ "id": 3, "nombre": "Miércoles" },
-				{ "id": 4, "nombre": "Jueves" },
-				{ "id": 5, "nombre": "Viernes" },
-				{ "id": 6, "nombre": "Sábado" },
-				{ "id": 7, "nombre": "Domingo" }
 			]
 		}
 	]

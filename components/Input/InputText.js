@@ -78,6 +78,7 @@ const styles = StyleSheet.create({
   leftAlign: {
     flexDirection: 'row',
     alignItems: 'center',
+    width: '100%',
   },
   label: {
     fontWeight: 'bold',
@@ -88,8 +89,8 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   labelLeft: {
-    marginRight: 12,
-    width: 80,
+    width: '50%',
+    marginRight: 8,
   },
   input: {
     borderWidth: 1,
@@ -103,7 +104,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputLeft: {
-    flex: 1,
+    width: '80%',
   },
   errorText: {
     color: 'red',
