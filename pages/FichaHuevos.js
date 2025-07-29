@@ -18,7 +18,6 @@ import formaPagoData from '../data/forma_pago.json';
 import condicionPagoData from '../data/condicion_pago.json';
 
 export default function FichaHuevos() {
-  // 1. Transformar datos
   const categoriasTransformadas = categoriasData.rows.map((categoria) => ({
     id_pregunta: `cat_${categoria.id_categoria}`,
     tipo: 'text',
@@ -37,9 +36,9 @@ export default function FichaHuevos() {
     descripcion: item.descripcion,
     labelPosition: 'left',
     options: [
-				{ id: 1, nombre: "Sí" },
-				{ id: 2, nombre: "No" }
-			]
+      { id: 1, nombre: 'Sí' },
+      { id: 2, nombre: 'No' },
+    ],
   }));
 
   const condicionPagoTransformada = condicionPagoData.rows.map((item) => ({
@@ -49,7 +48,6 @@ export default function FichaHuevos() {
     labelPosition: 'left',
   }));
 
-  // 2. Estados independientes
   const [categorias, setCategorias] = useState(
     categoriasTransformadas.reduce((acc, item) => {
       acc[item.id_pregunta] = '';
@@ -78,7 +76,6 @@ export default function FichaHuevos() {
     }, {})
   );
 
-  // 3. Renderizador reutilizable
   const renderPregunta = (pregunta, formData, updateFn) => {
     const {
       id_pregunta: id,
@@ -127,7 +124,7 @@ export default function FichaHuevos() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
     >
       <ScrollView
@@ -168,6 +165,6 @@ const styles = StyleSheet.create({
   },
   container: {
     padding: 20,
-    paddingBottom: 60,
+    paddingBottom: 100,
   },
 });

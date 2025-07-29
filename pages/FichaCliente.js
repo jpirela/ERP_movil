@@ -1,5 +1,11 @@
 import { useState } from 'react';
-import {StyleSheet, ScrollView, KeyboardAvoidingView, Platform, View } from 'react-native';
+import {
+  StyleSheet,
+  ScrollView,
+  KeyboardAvoidingView,
+  Platform,
+  View,
+} from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
 import InputText from '../components/Input/InputText';
@@ -41,7 +47,6 @@ export default function Cliente() {
   };
 
   const [object, setObject] = useState(INITIAL_OBJECT);
-
   const [filteredCiudades, setFilteredCiudades] = useState([]);
   const [filteredMunicipios, setFilteredMunicipios] = useState([]);
   const [filteredParroquias, setFilteredParroquias] = useState([]);
@@ -63,8 +68,8 @@ export default function Cliente() {
         updated.parroquia = '';
 
         const estadoId = parseInt(strValue, 10);
-        const ciudadesFiltradas = ciudades.rows.filter((c) => c.id_estado === estadoId);
-        const municipiosFiltrados = municipio.rows.filter((m) => m.id_estado === estadoId);
+        const ciudadesFiltradas = ciudades.filter((c) => c.id_estado === estadoId);
+        const municipiosFiltrados = municipio.filter((m) => m.id_estado === estadoId);
 
         setFilteredCiudades(ciudadesFiltradas);
         setFilteredMunicipios(municipiosFiltrados);
@@ -80,7 +85,7 @@ export default function Cliente() {
         updated.parroquia = '';
 
         const municipioId = parseInt(strValue, 10);
-        const parroquiasFiltradas = parroquia.rows.filter((p) => p.id_municipio === municipioId);
+        const parroquiasFiltradas = parroquia.filter((p) => p.id_municipio === municipioId);
 
         setFilteredParroquias(parroquiasFiltradas);
         setEnabled((prev) => ({
@@ -96,15 +101,16 @@ export default function Cliente() {
   return (
     <KeyboardAvoidingView
       style={styles.flex}
-      behavior={Platform.OS === 'ios' ? 'padding' : undefined}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 0}
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 100} // ajusta si tienes header/tab
     >
       <ScrollView
         contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={true}
         keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={true}
       >
         <View>
+          {/* Todos los campos */}
           <InputText id="nombre" value={object.nombre} placeholder="Nombre del negocio" onChange={updateFormValue} />
           <InputText id="razonSocial" value={object.razonSocial} placeholder="Razón Social" onChange={updateFormValue} />
           <InputText id="rif" value={object.rif} placeholder="RIF o CI" onChange={updateFormValue} />
@@ -130,7 +136,7 @@ export default function Cliente() {
             value={object.estado}
             labelTitle="Estado"
             onChange={updateFormValue}
-            options={estado.rows}
+            options={estado}
           />
           <SelectBox
             id="ciudad"
@@ -169,7 +175,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
   },
   container: {
+    flexGrow: 1,
     padding: 20,
-    paddingBottom: 60,
+    paddingBottom: 80, // suficiente para evitar que el teclado cubra los campos
   },
 });

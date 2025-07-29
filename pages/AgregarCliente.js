@@ -3,9 +3,11 @@ import { View, useWindowDimensions, StyleSheet, Text, TouchableOpacity } from 'r
 import { TabView, TabBar } from 'react-native-tab-view';
 import FichaCliente from './FichaCliente';
 import FichaHuevos from './FichaHuevos';
+import { useNavigation } from '@react-navigation/native';
 
 export default function AgregarCliente() {
   const layout = useWindowDimensions();
+  const navigation = useNavigation();
   const [index, setIndex] = useState(0);
   const [routes] = useState([
     { key: 'cliente', title: 'Ficha Cliente' },

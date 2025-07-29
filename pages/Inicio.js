@@ -1,8 +1,16 @@
 import { useState, useMemo, useEffect } from 'react';
-import {View, Text, TouchableOpacity, StyleSheet, ScrollView, TextInput } from 'react-native';
+import {
+  View,
+  Text,
+  TouchableOpacity,
+  StyleSheet,
+  ScrollView,
+  TextInput,
+  Alert,
+} from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import clientesData from '../data/clientes.json'; // Ajusta la ruta si es necesario
+import { leerModeloFS } from '../utils/syncDataFS'; // ✅ NUEVA importación
 
 const icons = {
   editar: <MaterialCommunityIcons name="account-edit-outline" size={24} color="gray" />,
@@ -15,9 +23,12 @@ const Inicio = () => {
   const navigation = useNavigation();
 
   useEffect(() => {
-    if (clientesData && clientesData.rows) {
-      setClientes(clientesData.rows);
-    }
+    const cargarClientes = async () => {
+      const data = await leerModeloFS('clientes');
+      setClientes(data);
+    };
+
+    cargarClientes();
   }, []);
 
   const filteredClientes = useMemo(() => {
@@ -29,6 +40,27 @@ const Inicio = () => {
 
   const handleAgregarCliente = () => {
     navigation.navigate('AgregarCliente');
+  };
+
+  const handleEditar = (idCliente) => {
+    console.log('Editar cliente con ID:', idCliente);
+  };
+
+  const handleEliminar = (idCliente) => {
+    Alert.alert(
+      'Confirmación',
+      '¿Está seguro de eliminar al cliente seleccionado?',
+      [
+        { text: 'No', style: 'cancel' },
+        {
+          text: 'Sí',
+          onPress: () => {
+            setClientes(prev => prev.filter(cliente => cliente.idCliente !== idCliente));
+          },
+        },
+      ],
+      { cancelable: true }
+    );
   };
 
   return (
@@ -52,20 +84,16 @@ const Inicio = () => {
         <Text style={[styles.cell, styles.headerCell, { width: '25%' }]}>Acciones</Text>
       </View>
 
-      {/* Scroll solo para la tabla */}
-      <ScrollView
-        style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
+      {/* Lista de clientes */}
+      <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
         {filteredClientes.map(cliente => (
           <View key={cliente.idCliente} style={styles.row}>
             <Text style={[styles.cell, { flex: 1 }]}>{cliente.nombre}</Text>
             <View style={[styles.actionsCell, { width: '25%' }]}>
-              <TouchableOpacity style={styles.actionBtn}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => handleEditar(cliente.idCliente)}>
                 {icons.editar}
               </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn}>
+              <TouchableOpacity style={styles.actionBtn} onPress={() => handleEliminar(cliente.idCliente)}>
                 {icons.eliminar}
               </TouchableOpacity>
             </View>
