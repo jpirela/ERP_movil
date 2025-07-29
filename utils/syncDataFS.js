@@ -1,10 +1,15 @@
-// utils/syncDataFS.js
 import * as FileSystem from 'expo-file-system';
 import Constants from 'expo-constants';
 import NetInfo from '@react-native-community/netinfo';
 
-const { API_BASE_URL, MODELOS } = Constants.expoConfig.extra;
+const { URL_BASE, MODELOS: MODELOS_NOMBRES } = Constants.expoConfig.extra;
 const DATA_DIR = FileSystem.documentDirectory + 'data/';
+
+// Construimos un objeto con nombre de modelo -> ruta local
+const MODELOS = {};
+MODELOS_NOMBRES.forEach((modelo) => {
+  MODELOS[modelo] = `${DATA_DIR}${modelo}.json`;
+});
 
 /**
  * Asegura que el directorio de datos exista
@@ -30,7 +35,7 @@ const getModeloPathPairs = () => {
  * Sincroniza un modelo: descarga desde API o crea archivo vacío si no hay datos
  */
 export const syncModeloFS = async (modelo, filePath) => {
-  const url = `${API_BASE_URL}/${modelo}`;
+  const url = `${URL_BASE}/${modelo}`;
 
   try {
     const response = await fetch(url);
@@ -46,7 +51,6 @@ export const syncModeloFS = async (modelo, filePath) => {
     console.log(`✅ ${modelo}.json actualizado correctamente`);
   } catch (error) {
     console.warn(`⚠️ Error al sincronizar ${modelo}: ${error.message}`);
-    // Si el archivo no existe, crear archivo vacío
     const archivoExiste = await FileSystem.getInfoAsync(filePath);
     if (!archivoExiste.exists) {
       await FileSystem.writeAsStringAsync(filePath, '[]', {
@@ -74,7 +78,6 @@ export const syncTodosLosModelosFS = async () => {
       } else {
         const archivoExiste = await FileSystem.getInfoAsync(filePath);
         if (!archivoExiste.exists) {
-          // Crear archivo vacío si no hay conexión y archivo no existe
           await FileSystem.writeAsStringAsync(filePath, '[]', {
             encoding: FileSystem.EncodingType.UTF8,
           });
@@ -99,8 +102,8 @@ export const leerModeloFS = async (modelo) => {
     if (!archivoExiste.exists) {
       throw new Error(`Archivo ${modelo}.json no encontrado`);
     }
-
     const contenido = await FileSystem.readAsStringAsync(filePath);
+    
     return JSON.parse(contenido);
   } catch (err) {
     console.warn(`❌ Error al leer ${modelo}.json:`, err.message);

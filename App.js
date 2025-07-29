@@ -1,9 +1,10 @@
-import React from 'react';
+import { useEffect } from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Inicio from './pages/Inicio';
 import AgregarCliente from './pages/AgregarCliente';
 import { View, Image, StyleSheet } from 'react-native';
+import { syncTodosLosModelosFS } from './utils/syncDataFS';
 
 const Stack = createStackNavigator();
 
@@ -15,6 +16,10 @@ const CustomHeader = ({ title }) => (
 );
 
 export default function App() {
+  useEffect(() => {
+    syncTodosLosModelosFS(); // Se ejecuta al iniciar la app
+  }, []);
+
   return (
     <NavigationContainer>
       <Stack.Navigator

@@ -1,11 +1,11 @@
-import * as FileSystem from 'expo-file-system';
-
-const DATA_DIR = FileSystem.documentDirectory + 'data/';
-
-export const MODELOS = {
-  clientes: `${DATA_DIR}clientes.json`,
-  categoria: `${DATA_DIR}categoria.json`,
-  pregunta: `${DATA_DIR}pregunta.json`,
+export default {
+  expo: {
+    name: 'TuApp',
+    slug: 'tuapp',
+    version: '1.0.0',
+    extra: {
+      URL_BASE: 'http://192.168.1.105:8080/api',
+      MODELOS: ['clientes'],
+    },
+  },
 };
-
-export const API_BASE_URL = process.env.EXPO_PUBLIC_API_URL;
