@@ -1,10 +1,11 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   StyleSheet,
   ScrollView,
   KeyboardAvoidingView,
   Platform,
   View,
+  Text,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 
@@ -12,10 +13,7 @@ import InputText from '../components/Input/InputText';
 import TextArea from '../components/Input/TextArea';
 import SelectBox from '../components/Input/SelectBox';
 
-import ciudades from '../data/ciudades.json';
-import estado from '../data/estado.json';
-import municipio from '../data/municipio.json';
-import parroquia from '../data/parroquia.json';
+import { leerModeloFS } from '../utils/syncDataFS';
 
 export default function Cliente() {
   const INITIAL_OBJECT = {
@@ -47,62 +45,83 @@ export default function Cliente() {
   };
 
   const [object, setObject] = useState(INITIAL_OBJECT);
+  const [estados, setEstados] = useState([]);
+  const [ciudades, setCiudades] = useState([]);
   const [filteredCiudades, setFilteredCiudades] = useState([]);
-  const [filteredMunicipios, setFilteredMunicipios] = useState([]);
-  const [filteredParroquias, setFilteredParroquias] = useState([]);
+  const [municipios, setMunicipios] = useState([]);
+  const [parroquias, setParroquias] = useState([]);
 
-  const [enabled, setEnabled] = useState({
-    ciudad: false,
-    municipio: false,
-    parroquia: false,
-  });
+  const [enabledMunicipio, setEnabledMunicipio] = useState(false);
+  const [enabledParroquia, setEnabledParroquia] = useState(false);
+  const [enabledCiudad, setEnabledCiudad] = useState(false);
+
+  useEffect(() => {
+    const cargarDatos = async () => {
+      const [dataEstados, , dataCiudades] = await Promise.all([
+        leerModeloFS('estados'),
+        null,
+        leerModeloFS('ciudades'),
+      ]);
+      setEstados(dataEstados || []);
+      setCiudades(dataCiudades || []);
+    };
+
+    cargarDatos();
+  }, []);
 
   const updateFormValue = (id, value) => {
-    const strValue = value?.toString?.() ?? '';
-    setObject((prev) => {
-      const updated = { ...prev, [id]: strValue };
+    setObject((prev) => ({ ...prev, [id]: value }));
+  };
 
-      if (id === 'estado') {
-        updated.ciudad = '';
-        updated.municipio = '';
-        updated.parroquia = '';
+  const handleEstadoSelect = (idEstado) => {
+    updateFormValue('estado', idEstado);
 
-        const estadoId = parseInt(strValue, 10);
-        const ciudadesFiltradas = ciudades.filter((c) => c.id_estado === estadoId);
-        const municipiosFiltrados = municipio.filter((m) => m.id_estado === estadoId);
+    const estado = estados.find((e) => e.idEstado === idEstado);
+    if (estado) {
+      setMunicipios(estado.municipios || []);
+      setEnabledMunicipio(true);
+    } else {
+      setMunicipios([]);
+      setEnabledMunicipio(false);
+    }
 
-        setFilteredCiudades(ciudadesFiltradas);
-        setFilteredMunicipios(municipiosFiltrados);
-        setFilteredParroquias([]);
-        setEnabled({
-          ciudad: true,
-          municipio: true,
-          parroquia: false,
-        });
-      }
+    // Reset niveles dependientes
+    setParroquias([]);
+    setEnabledParroquia(false);
+    setEnabledCiudad(false);
+    updateFormValue('municipio', '');
+    updateFormValue('parroquia', '');
+    updateFormValue('ciudad', '');
 
-      if (id === 'municipio') {
-        updated.parroquia = '';
+    const ciudadesFiltradas = ciudades.filter(c => c.id_estado === idEstado);
+    setFilteredCiudades(ciudadesFiltradas);
+    setEnabledCiudad(true);
+  };
 
-        const municipioId = parseInt(strValue, 10);
-        const parroquiasFiltradas = parroquia.filter((p) => p.id_municipio === municipioId);
+  const handleMunicipioSelect = (idMunicipio) => {
+    updateFormValue('municipio', idMunicipio);
 
-        setFilteredParroquias(parroquiasFiltradas);
-        setEnabled((prev) => ({
-          ...prev,
-          parroquia: true,
-        }));
-      }
+    const municipio = municipios.find((m) => m.idMunicipio === idMunicipio);
+    if (municipio) {
+      setParroquias(municipio.parroquias || []);
+      setEnabledParroquia(true);
+    } else {
+      setParroquias([]);
+      setEnabledParroquia(false);
+    }
 
-      return updated;
-    });
+    updateFormValue('parroquia', '');
+  };
+
+  const handleParroquiaSelect = (idParroquia) => {
+    updateFormValue('parroquia', idParroquia);
   };
 
   return (
     <KeyboardAvoidingView
       style={styles.flex}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 100} // ajusta si tienes header/tab
+      keyboardVerticalOffset={Platform.OS === 'ios' ? 64 : 100}
     >
       <ScrollView
         contentContainerStyle={styles.container}
@@ -110,7 +129,7 @@ export default function Cliente() {
         showsVerticalScrollIndicator={true}
       >
         <View>
-          {/* Todos los campos */}
+          {/* Inputs de texto */}
           <InputText id="nombre" value={object.nombre} placeholder="Nombre del negocio" onChange={updateFormValue} />
           <InputText id="razonSocial" value={object.razonSocial} placeholder="Razón Social" onChange={updateFormValue} />
           <InputText id="rif" value={object.rif} placeholder="RIF o CI" onChange={updateFormValue} />
@@ -131,37 +150,45 @@ export default function Cliente() {
           <InputText id="tiktok" value={object.tiktok} placeholder="Tiktok" onChange={updateFormValue} />
           <InputText id="paginaWeb" value={object.paginaWeb} placeholder="Página web" onChange={updateFormValue} />
 
+          {/* Selectores de Ubicación */}
+          <Text style={styles.label}>Ubicación: Estado → Municipio → Parroquia</Text>
+
           <SelectBox
             id="estado"
             value={object.estado}
             labelTitle="Estado"
-            onChange={updateFormValue}
-            options={estado}
+            onChange={handleEstadoSelect}
+            options={estados.map((e) => ({ id: e.idEstado, nombre: e.nombre }))}
+            enabled={estados.length > 0}
           />
+
+          <SelectBox
+            id="municipio"
+            value={object.municipio}
+            labelTitle="Municipio"
+            onChange={handleMunicipioSelect}
+            options={municipios.map((m) => ({ id: m.idMunicipio, nombre: m.nombre }))}
+            enabled={enabledMunicipio}
+          />
+
+          <SelectBox
+            id="parroquia"
+            value={object.parroquia}
+            labelTitle="Parroquia"
+            onChange={handleParroquiaSelect}
+            options={parroquias.map((p) => ({ id: p.idParroquia, nombre: p.nombre }))}
+            enabled={enabledParroquia}
+          />
+
           <SelectBox
             id="ciudad"
             value={object.ciudad}
             labelTitle="Ciudad"
             onChange={updateFormValue}
-            options={filteredCiudades}
-            enabled={enabled.ciudad}
+            options={filteredCiudades.map((c) => ({ id: c.idCiudad, nombre: c.nombre }))}
+            enabled={enabledCiudad}
           />
-          <SelectBox
-            id="municipio"
-            value={object.municipio}
-            labelTitle="Municipio"
-            onChange={updateFormValue}
-            options={filteredMunicipios}
-            enabled={enabled.municipio}
-          />
-          <SelectBox
-            id="parroquia"
-            value={object.parroquia}
-            labelTitle="Parroquia"
-            onChange={updateFormValue}
-            options={filteredParroquias}
-            enabled={enabled.parroquia}
-          />
+
           <StatusBar style="auto" />
         </View>
       </ScrollView>
@@ -177,6 +204,12 @@ const styles = StyleSheet.create({
   container: {
     flexGrow: 1,
     padding: 20,
-    paddingBottom: 80, // suficiente para evitar que el teclado cubra los campos
+    paddingBottom: 80,
+  },
+  label: {
+    fontWeight: 'bold',
+    marginTop: 20,
+    marginBottom: 10,
+    fontSize: 16,
   },
 });
