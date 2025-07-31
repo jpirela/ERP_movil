@@ -47,42 +47,64 @@ export default function FichaHuevos() {
       const formasPago = Array.isArray(formaPagoData) ? formaPagoData : (formaPagoData?.rows ?? []);
       const condicionesPago = Array.isArray(condicionPagoData) ? condicionPagoData : (condicionPagoData?.rows ?? []);
 
-      // Logs de depuración
+      // Logs de depuración detallados
       console.log('📊 Datos cargados:');
       console.log('  - Categorías:', categorias.length, 'elementos');
+      console.log('  - Primera categoría:', categorias[0]);
       console.log('  - Preguntas:', preguntas.length, 'elementos');
+      console.log('  - Primera pregunta:', preguntas[0]);
       console.log('  - Formas de pago:', formasPago.length, 'elementos');
+      console.log('  - Primera forma de pago:', formasPago[0]);
       console.log('  - Condiciones de pago:', condicionesPago.length, 'elementos');
+      console.log('  - Primera condición de pago:', condicionesPago[0]);
 
-      const catTransformadas = categorias.map((categoria) => ({
-        id_pregunta: `cat_${categoria.id_categoria}`,
-        tipo: 'text',
-        descripcion: `${categoria.nombre} (${categoria.descripcion})`,
-        labelPosition: 'left',
-      }));
+      const catTransformadas = categorias
+        .filter(categoria => categoria && categoria.idCategoria != null)
+        .map((categoria) => ({
+          id_pregunta: `cat_${categoria.idCategoria}`,
+          tipo: 'text',
+          descripcion: `${categoria.nombre || 'Sin nombre'} (${categoria.descripcion || 'Sin descripción'})`,
+          labelPosition: 'left',
+        }));
 
-      const pregTransformadas = preguntas.map((pregunta) => ({
-        ...pregunta,
-        labelPosition: 'top',
-      }));
+      const pregTransformadas = preguntas
+        .filter(pregunta => pregunta && pregunta.idPregunta != null)
+        .map((pregunta) => ({
+          id_pregunta: pregunta.idPregunta,
+          tipo: pregunta.tipo || 'text',
+          descripcion: pregunta.descripcion || 'Sin descripción',
+          options: pregunta.options,
+          labelPosition: 'top',
+        }));
 
-      const formaPagoTransformada = formasPago.map((item) => ({
-        id_pregunta: `forma_${item.id_forma_pago}`,
-        tipo: 'select',
-        descripcion: item.descripcion,
-        labelPosition: 'left',
-        options: [
-          { id: 1, nombre: 'Sí' },
-          { id: 2, nombre: 'No' },
-        ],
-      }));
+      const formaPagoTransformada = formasPago
+        .filter(item => item && item.idFormaPago != null)
+        .map((item) => ({
+          id_pregunta: `forma_${item.idFormaPago}`,
+          tipo: 'select',
+          descripcion: item.descripcion || 'Sin descripción',
+          labelPosition: 'left',
+          options: [
+            { id: 1, nombre: 'Sí' },
+            { id: 2, nombre: 'No' },
+          ],
+        }));
 
-      const condPagoTransformada = condicionesPago.map((item) => ({
-        id_pregunta: `cond_${item.id_condicion_pago}`,
-        tipo: 'text',
-        descripcion: item.descripcion,
-        labelPosition: 'left',
-      }));
+      const condPagoTransformada = condicionesPago
+        .filter(item => item && item.idCondicionPago != null)
+        .map((item) => ({
+          id_pregunta: `cond_${item.idCondicionPago}`,
+          tipo: 'text',
+          descripcion: item.descripcion || 'Sin descripción',
+          labelPosition: 'left',
+        }));
+
+      // Logs de datos transformados
+      console.log('🔄 Datos transformados:');
+      console.log('  - Categorías transformadas:', catTransformadas.length);
+      console.log('  - Preguntas transformadas:', pregTransformadas.length);
+      console.log('  - Formas de pago transformadas:', formaPagoTransformada.length);
+      console.log('  - Condiciones de pago transformadas:', condPagoTransformada.length);
 
       setCategoriasTransformadas(catTransformadas);
       setPreguntasTransformadas(pregTransformadas);

@@ -97,14 +97,30 @@ export const syncTodosLosModelosFS = async () => {
  */
 export const leerModeloFS = async (modelo) => {
   const filePath = MODELOS[modelo];
+  
+  if (!filePath) {
+    console.warn(`❌ Modelo '${modelo}' no está configurado en MODELOS`);
+    return [];
+  }
+  
   try {
     const archivoExiste = await FileSystem.getInfoAsync(filePath);
     if (!archivoExiste.exists) {
-      throw new Error(`Archivo ${modelo}.json no encontrado`);
+      console.warn(`📄 Archivo ${modelo}.json no encontrado en: ${filePath}`);
+      return [];
     }
+    
     const contenido = await FileSystem.readAsStringAsync(filePath);
     
-    return JSON.parse(contenido);
+    if (!contenido || contenido.trim() === '') {
+      console.warn(`📄 Archivo ${modelo}.json está vacío`);
+      return [];
+    }
+    
+    const datos = JSON.parse(contenido);
+    console.log(`✅ ${modelo}.json leído correctamente - ${Array.isArray(datos) ? datos.length : 'N/A'} registros`);
+    
+    return datos;
   } catch (err) {
     console.warn(`❌ Error al leer ${modelo}.json:`, err.message);
     return [];
