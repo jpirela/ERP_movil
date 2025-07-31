@@ -47,16 +47,6 @@ export default function FichaHuevos() {
       const formasPago = Array.isArray(formaPagoData) ? formaPagoData : (formaPagoData?.rows ?? []);
       const condicionesPago = Array.isArray(condicionPagoData) ? condicionPagoData : (condicionPagoData?.rows ?? []);
 
-      // Logs de depuración detallados
-      console.log('📊 Datos cargados:');
-      console.log('  - Categorías:', categorias.length, 'elementos');
-      console.log('  - Primera categoría:', categorias[0]);
-      console.log('  - Preguntas:', preguntas.length, 'elementos');
-      console.log('  - Primera pregunta:', preguntas[0]);
-      console.log('  - Formas de pago:', formasPago.length, 'elementos');
-      console.log('  - Primera forma de pago:', formasPago[0]);
-      console.log('  - Condiciones de pago:', condicionesPago.length, 'elementos');
-      console.log('  - Primera condición de pago:', condicionesPago[0]);
 
       const catTransformadas = categorias
         .filter(categoria => categoria && categoria.idCategoria != null)
@@ -69,13 +59,35 @@ export default function FichaHuevos() {
 
       const pregTransformadas = preguntas
         .filter(pregunta => pregunta && pregunta.idPregunta != null)
-        .map((pregunta) => ({
-          id_pregunta: pregunta.idPregunta,
-          tipo: pregunta.tipo || 'text',
-          descripcion: pregunta.descripcion || 'Sin descripción',
-          options: pregunta.options,
-          labelPosition: 'top',
-        }));
+        .map((pregunta) => {
+          let transformedPregunta = {
+            id_pregunta: pregunta.idPregunta,
+            tipo: pregunta.tipo || 'text',
+            descripcion: pregunta.descripcion || 'Sin descripción',
+            options: pregunta.options,
+            labelPosition: 'top',
+          };
+
+          // Agregar opciones específicas para pregunta sobre flete
+          if (pregunta.descripcion && pregunta.descripcion.includes('¿Paga flete?')) {
+            transformedPregunta.tipo = 'select';
+            transformedPregunta.options = [
+              { id: 1, nombre: 'Si' },
+              { id: 2, nombre: 'No' }
+            ];
+          }
+
+          // Agregar opciones específicas para pregunta sobre búsqueda de huevos
+          if (pregunta.descripcion && pregunta.descripcion.includes('¿Usted busca los huevos o se los traen?')) {
+            transformedPregunta.tipo = 'select';
+            transformedPregunta.options = [
+              { id: 1, nombre: 'Me los traen' },
+              { id: 2, nombre: 'Los busco' }
+            ];
+          }
+
+          return transformedPregunta;
+        });
 
       const formaPagoTransformada = formasPago
         .filter(item => item && item.idFormaPago != null)
@@ -85,7 +97,7 @@ export default function FichaHuevos() {
           descripcion: item.descripcion || 'Sin descripción',
           labelPosition: 'left',
           options: [
-            { id: 1, nombre: 'Sí' },
+            { id: 1, nombre: 'Si' },
             { id: 2, nombre: 'No' },
           ],
         }));
@@ -99,12 +111,6 @@ export default function FichaHuevos() {
           labelPosition: 'left',
         }));
 
-      // Logs de datos transformados
-      console.log('🔄 Datos transformados:');
-      console.log('  - Categorías transformadas:', catTransformadas.length);
-      console.log('  - Preguntas transformadas:', pregTransformadas.length);
-      console.log('  - Formas de pago transformadas:', formaPagoTransformada.length);
-      console.log('  - Condiciones de pago transformadas:', condPagoTransformada.length);
 
       setCategoriasTransformadas(catTransformadas);
       setPreguntasTransformadas(pregTransformadas);
