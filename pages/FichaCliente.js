@@ -45,11 +45,19 @@ export default function Cliente() {
   };
 
   const [object, setObject] = useState(INITIAL_OBJECT);
+  
+  // Variables de estado para los modelos completos
+  const [modeloEstados, setModeloEstados] = useState([]);
+  const [modeloCiudades, setModeloCiudades] = useState([]);
+  
+  // Variables de estado para llenar los SelectBox
   const [estados, setEstados] = useState([]);
   const [ciudades, setCiudades] = useState([]);
   const [municipios, setMunicipios] = useState([]);
   const [parroquias, setParroquias] = useState([]);
 
+  // Estados de habilitación de SelectBox
+  const [enabledCiudad, setEnabledCiudad] = useState(false);
   const [enabledMunicipio, setEnabledMunicipio] = useState(false);
   const [enabledParroquia, setEnabledParroquia] = useState(false);
 
@@ -60,8 +68,22 @@ export default function Cliente() {
         null,
         leerModeloFS('ciudades'),
       ]);
-      setEstados(dataEstados || []);
-      setCiudades(dataCiudades || []);
+      
+      // Guardar los modelos completos
+      setModeloEstados(dataEstados || []);
+      setModeloCiudades(dataCiudades || []);
+      
+      // Crear variable Estados solo con idEstado y nombre
+      const estadosSimplificados = (dataEstados || []).map(estado => ({
+        idEstado: estado.idEstado,
+        nombre: estado.nombre
+      }));
+      setEstados(estadosSimplificados);
+      
+      // Inicializar variables vacías para los demás SelectBox
+      setCiudades([]);
+      setMunicipios([]);
+      setParroquias([]);
     };
 
     cargarDatos();
@@ -72,63 +94,99 @@ export default function Cliente() {
   };
 
   const handleEstadoSelect = (id, idEstado) => {
-    console.log('Estado seleccionado:', idEstado);
-    console.log('Tipo de idEstado:', typeof idEstado);
-    console.log('Total estados disponibles:', estados.length);
-    console.log('Primeros 3 estados:', estados.slice(0, 3));
+    console.log('Estado seleccionado:', idEstado, 'Tipo:', typeof idEstado);
+    console.log('ModeloEstados disponibles:', modeloEstados.length);
+    console.log('Primeros 3 IDs del modelo:', modeloEstados.slice(0, 3).map(e => ({ id: e.idEstado, tipo: typeof e.idEstado })));
+    
     updateFormValue('estado', idEstado);
 
     // Reset niveles dependientes primero
+    setMunicipios([]);
     setParroquias([]);
+    setCiudades([]);
+    setEnabledMunicipio(false);
     setEnabledParroquia(false);
+    setEnabledCiudad(false);
     updateFormValue('municipio', '');
     updateFormValue('parroquia', '');
     updateFormValue('ciudad', '');
 
     if (idEstado && idEstado !== '') {
-      const estado = estados.find((e) => e.idEstado === idEstado);
-      console.log('Estado encontrado:', estado);
-      console.log('Buscando idEstado:', idEstado, 'en estados con IDs:', estados.map(e => e.idEstado));
+      // Convertir a número para asegurar comparación correcta
+      const idEstadoNum = parseInt(idEstado, 10);
+      console.log('IdEstado convertido a número:', idEstadoNum);
       
-      if (estado) {
-        setMunicipios(estado.municipios || []);
+      // Buscar el estado en el modelo completo con comparación flexible
+      const estadoCompleto = modeloEstados.find((e) => {
+        const match = e.idEstado === idEstado || e.idEstado === idEstadoNum;
+        if (match) {
+          console.log('Match encontrado con estado:', e.idEstado, e.nombre);
+        }
+        return match;
+      });
+      
+      console.log('Estado encontrado:', estadoCompleto ? { id: estadoCompleto.idEstado, nombre: estadoCompleto.nombre } : 'No encontrado');
+      
+      if (estadoCompleto) {
+        // Llenar municipios del estado seleccionado
+        const municipiosDelEstado = estadoCompleto.municipios || [];
+        setMunicipios(municipiosDelEstado);
         setEnabledMunicipio(true);
-        console.log('Municipios cargados:', estado.municipios?.length || 0);
+        console.log('Municipios cargados:', municipiosDelEstado.length);
+        
+        // Filtrar ciudades por idEstado usando comparación flexible
+        const ciudadesDelEstado = modeloCiudades.filter(ciudad => 
+          ciudad.idEstado === idEstado || ciudad.idEstado === idEstadoNum
+        );
+        setCiudades(ciudadesDelEstado);
+        setEnabledCiudad(true);
+        console.log('Ciudades filtradas:', ciudadesDelEstado.length);
       } else {
-        setMunicipios([]);
-        setEnabledMunicipio(false);
+        console.log('No se encontró el estado. Verificando todos los IDs disponibles:');
+        console.log('IDs en modeloEstados:', modeloEstados.map(e => e.idEstado));
       }
-
-      // Las ciudades siempre están habilitadas (se muestran todas)
-      console.log('Total ciudades disponibles:', ciudades.length);
-    } else {
-      setMunicipios([]);
-      setEnabledMunicipio(false);
     }
   };
 
   const handleMunicipioSelect = (id, idMunicipio) => {
-    console.log('Municipio seleccionado:', idMunicipio);
+    console.log('Municipio seleccionado:', idMunicipio, 'Tipo:', typeof idMunicipio);
+    console.log('Municipios disponibles:', municipios.length);
+    console.log('Primeros 3 IDs de municipios:', municipios.slice(0, 3).map(m => ({ id: m.idMunicipio, tipo: typeof m.idMunicipio, nombre: m.nombre })));
+    
     updateFormValue('municipio', idMunicipio);
 
+    // Reset parroquias
+    setParroquias([]);
+    setEnabledParroquia(false);
+    updateFormValue('parroquia', '');
+
     if (idMunicipio && idMunicipio !== '') {
-      const municipio = municipios.find((m) => m.idMunicipio === idMunicipio);
-      console.log('Municipio encontrado:', municipio);
+      // Convertir a número para asegurar comparación correcta
+      const idMunicipioNum = parseInt(idMunicipio, 10);
+      console.log('IdMunicipio convertido a número:', idMunicipioNum);
+      
+      // Buscar el municipio en la lista actual con comparación flexible
+      const municipio = municipios.find((m) => {
+        const match = m.idMunicipio === idMunicipio || m.idMunicipio === idMunicipioNum;
+        if (match) {
+          console.log('Match encontrado con municipio:', m.idMunicipio, m.nombre);
+        }
+        return match;
+      });
+      
+      console.log('Municipio encontrado:', municipio ? { id: municipio.idMunicipio, nombre: municipio.nombre } : 'No encontrado');
       
       if (municipio) {
-        setParroquias(municipio.parroquias || []);
+        // Llenar parroquias del municipio seleccionado
+        const parroquiasDelMunicipio = municipio.parroquias || [];
+        setParroquias(parroquiasDelMunicipio);
         setEnabledParroquia(true);
-        console.log('Parroquias cargadas:', municipio.parroquias?.length || 0);
+        console.log('Parroquias cargadas:', parroquiasDelMunicipio.length);
       } else {
-        setParroquias([]);
-        setEnabledParroquia(false);
+        console.log('No se encontró el municipio. Verificando todos los IDs disponibles:');
+        console.log('IDs en municipios:', municipios.map(m => m.idMunicipio));
       }
-    } else {
-      setParroquias([]);
-      setEnabledParroquia(false);
     }
-
-    updateFormValue('parroquia', '');
   };
 
   const handleParroquiaSelect = (id, idParroquia) => {
@@ -217,7 +275,7 @@ export default function Cliente() {
               realId: c.idCiudad || c.id_ciudad,
               nombre: c.nombre,
             }))}
-            enabled={ciudades.length > 0}
+            enabled={enabledCiudad}
           />
 
           <StatusBar style="auto" />
