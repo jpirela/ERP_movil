@@ -47,13 +47,11 @@ export default function Cliente() {
   const [object, setObject] = useState(INITIAL_OBJECT);
   const [estados, setEstados] = useState([]);
   const [ciudades, setCiudades] = useState([]);
-  const [filteredCiudades, setFilteredCiudades] = useState([]);
   const [municipios, setMunicipios] = useState([]);
   const [parroquias, setParroquias] = useState([]);
 
   const [enabledMunicipio, setEnabledMunicipio] = useState(false);
   const [enabledParroquia, setEnabledParroquia] = useState(false);
-  const [enabledCiudad, setEnabledCiudad] = useState(false);
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -73,38 +71,58 @@ export default function Cliente() {
     setObject((prev) => ({ ...prev, [id]: value }));
   };
 
-  const handleEstadoSelect = (idEstado) => {
+  const handleEstadoSelect = (id, idEstado) => {
+    console.log('Estado seleccionado:', idEstado);
+    console.log('Tipo de idEstado:', typeof idEstado);
+    console.log('Total estados disponibles:', estados.length);
+    console.log('Primeros 3 estados:', estados.slice(0, 3));
     updateFormValue('estado', idEstado);
 
-    const estado = estados.find((e) => e.idEstado === idEstado);
-    if (estado) {
-      setMunicipios(estado.municipios || []);
-      setEnabledMunicipio(true);
-    } else {
-      setMunicipios([]);
-      setEnabledMunicipio(false);
-    }
-
-    // Reset niveles dependientes
+    // Reset niveles dependientes primero
     setParroquias([]);
     setEnabledParroquia(false);
-    setEnabledCiudad(false);
     updateFormValue('municipio', '');
     updateFormValue('parroquia', '');
     updateFormValue('ciudad', '');
 
-    const ciudadesFiltradas = ciudades.filter(c => c.id_estado === idEstado);
-    setFilteredCiudades(ciudadesFiltradas);
-    setEnabledCiudad(true);
+    if (idEstado && idEstado !== '') {
+      const estado = estados.find((e) => e.idEstado === idEstado);
+      console.log('Estado encontrado:', estado);
+      console.log('Buscando idEstado:', idEstado, 'en estados con IDs:', estados.map(e => e.idEstado));
+      
+      if (estado) {
+        setMunicipios(estado.municipios || []);
+        setEnabledMunicipio(true);
+        console.log('Municipios cargados:', estado.municipios?.length || 0);
+      } else {
+        setMunicipios([]);
+        setEnabledMunicipio(false);
+      }
+
+      // Las ciudades siempre están habilitadas (se muestran todas)
+      console.log('Total ciudades disponibles:', ciudades.length);
+    } else {
+      setMunicipios([]);
+      setEnabledMunicipio(false);
+    }
   };
 
-  const handleMunicipioSelect = (idMunicipio) => {
+  const handleMunicipioSelect = (id, idMunicipio) => {
+    console.log('Municipio seleccionado:', idMunicipio);
     updateFormValue('municipio', idMunicipio);
 
-    const municipio = municipios.find((m) => m.idMunicipio === idMunicipio);
-    if (municipio) {
-      setParroquias(municipio.parroquias || []);
-      setEnabledParroquia(true);
+    if (idMunicipio && idMunicipio !== '') {
+      const municipio = municipios.find((m) => m.idMunicipio === idMunicipio);
+      console.log('Municipio encontrado:', municipio);
+      
+      if (municipio) {
+        setParroquias(municipio.parroquias || []);
+        setEnabledParroquia(true);
+        console.log('Parroquias cargadas:', municipio.parroquias?.length || 0);
+      } else {
+        setParroquias([]);
+        setEnabledParroquia(false);
+      }
     } else {
       setParroquias([]);
       setEnabledParroquia(false);
@@ -113,7 +131,7 @@ export default function Cliente() {
     updateFormValue('parroquia', '');
   };
 
-  const handleParroquiaSelect = (idParroquia) => {
+  const handleParroquiaSelect = (id, idParroquia) => {
     updateFormValue('parroquia', idParroquia);
   };
 
@@ -150,15 +168,16 @@ export default function Cliente() {
           <InputText id="tiktok" value={object.tiktok} placeholder="Tiktok" onChange={updateFormValue} />
           <InputText id="paginaWeb" value={object.paginaWeb} placeholder="Página web" onChange={updateFormValue} />
 
-          {/* Selectores de Ubicación */}
-          <Text style={styles.label}>Ubicación: Estado → Municipio → Parroquia</Text>
-
           <SelectBox
             id="estado"
             value={object.estado}
             labelTitle="Estado"
             onChange={handleEstadoSelect}
-            options={estados.map((e) => ({ id: e.idEstado, nombre: e.nombre }))}
+            options={estados.map((e) => ({
+              id: `estado-${e.idEstado}`,
+              realId: e.idEstado,
+              nombre: e.nombre,
+            }))}
             enabled={estados.length > 0}
           />
 
@@ -167,7 +186,11 @@ export default function Cliente() {
             value={object.municipio}
             labelTitle="Municipio"
             onChange={handleMunicipioSelect}
-            options={municipios.map((m) => ({ id: m.idMunicipio, nombre: m.nombre }))}
+            options={municipios.map((m) => ({
+              id: `mun-${object.estado}-${m.idMunicipio}`,
+              realId: m.idMunicipio,
+              nombre: m.nombre,
+            }))}
             enabled={enabledMunicipio}
           />
 
@@ -176,7 +199,11 @@ export default function Cliente() {
             value={object.parroquia}
             labelTitle="Parroquia"
             onChange={handleParroquiaSelect}
-            options={parroquias.map((p) => ({ id: p.idParroquia, nombre: p.nombre }))}
+            options={parroquias.map((p) => ({
+              id: `parr-${object.estado}-${object.municipio}-${p.idParroquia}`,
+              realId: p.idParroquia,
+              nombre: p.nombre,
+            }))}
             enabled={enabledParroquia}
           />
 
@@ -185,8 +212,12 @@ export default function Cliente() {
             value={object.ciudad}
             labelTitle="Ciudad"
             onChange={updateFormValue}
-            options={filteredCiudades.map((c) => ({ id: c.idCiudad, nombre: c.nombre }))}
-            enabled={enabledCiudad}
+            options={ciudades.map((c) => ({
+              id: `ciudad-${c.idCiudad || c.id_ciudad}`,
+              realId: c.idCiudad || c.id_ciudad,
+              nombre: c.nombre,
+            }))}
+            enabled={ciudades.length > 0}
           />
 
           <StatusBar style="auto" />

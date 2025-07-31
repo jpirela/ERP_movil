@@ -2,32 +2,18 @@ import * as FileSystem from 'expo-file-system';
 import Constants from 'expo-constants';
 import NetInfo from '@react-native-community/netinfo';
 
-// Datos embebidos para Snack
-import estadosDefault from '../data/estados.json';
-import municipiosDefault from '../data/municipios.json';
-import parroquiasDefault from '../data/parroquias.json';
-import ciudadesDefault from '../data/ciudades.json';
-
 const { URL_BASE, MODELOS: MODELOS_NOMBRES } = Constants.expoConfig.extra;
 const DATA_DIR = FileSystem.documentDirectory + 'data/';
 
-const isRunningInSnack =
-  Constants.appOwnership === 'expo' && Constants.executionEnvironment === 'storeClient';
-
-// Mapas de respaldo para Snack
-const MODELO_DEFAULTS = {
-  estados: estadosDefault,
-  municipios: municipiosDefault,
-  parroquias: parroquiasDefault,
-  ciudades: ciudadesDefault,
-};
-
-// Rutas de archivos por modelo
+// Construimos un objeto con nombre de modelo -> ruta local
 const MODELOS = {};
 MODELOS_NOMBRES.forEach((modelo) => {
   MODELOS[modelo] = `${DATA_DIR}${modelo}.json`;
 });
 
+/**
+ * Asegura que el directorio de datos exista
+ */
 const asegurarDataDir = async () => {
   const dirInfo = await FileSystem.getInfoAsync(DATA_DIR);
   if (!dirInfo.exists) {
@@ -35,6 +21,9 @@ const asegurarDataDir = async () => {
   }
 };
 
+/**
+ * Devuelve el nombre del modelo y su ruta de archivo
+ */
 const getModeloPathPairs = () => {
   return Object.entries(MODELOS).map(([modelo, filePath]) => ({
     modelo,
@@ -42,12 +31,10 @@ const getModeloPathPairs = () => {
   }));
 };
 
+/**
+ * Sincroniza un modelo: descarga desde API o crea archivo vacío si no hay datos
+ */
 export const syncModeloFS = async (modelo, filePath) => {
-  if (isRunningInSnack) {
-    console.log(`⚠️ Saltando sync de ${modelo} en Snack`);
-    return;
-  }
-
   const url = `${URL_BASE}/${modelo}`;
 
   try {
@@ -61,7 +48,7 @@ export const syncModeloFS = async (modelo, filePath) => {
       encoding: FileSystem.EncodingType.UTF8,
     });
 
-    console.log(`✅ ${modelo}.json actualizado correctamente`);
+    console.log(`✅ ${modelo}.json actualizado correctamente (${Array.isArray(data) ? data.length : 0} registros)`);
   } catch (error) {
     console.warn(`⚠️ Error al sincronizar ${modelo}: ${error.message}`);
     const archivoExiste = await FileSystem.getInfoAsync(filePath);
@@ -74,12 +61,10 @@ export const syncModeloFS = async (modelo, filePath) => {
   }
 };
 
+/**
+ * Sincroniza todos los modelos si hay conexión
+ */
 export const syncTodosLosModelosFS = async () => {
-  if (isRunningInSnack) {
-    console.log('⚠️ Ejecutando en Snack: no se sincroniza FileSystem');
-    return;
-  }
-
   try {
     await asegurarDataDir();
 
@@ -107,12 +92,10 @@ export const syncTodosLosModelosFS = async () => {
   }
 };
 
+/**
+ * Lee un archivo local con los datos del modelo
+ */
 export const leerModeloFS = async (modelo) => {
-  if (isRunningInSnack) {
-    console.log(`📦 Snack: leyendo ${modelo} desde código`);
-    return MODELO_DEFAULTS[modelo] ?? [];
-  }
-
   const filePath = MODELOS[modelo];
   try {
     const archivoExiste = await FileSystem.getInfoAsync(filePath);
@@ -120,7 +103,7 @@ export const leerModeloFS = async (modelo) => {
       throw new Error(`Archivo ${modelo}.json no encontrado`);
     }
     const contenido = await FileSystem.readAsStringAsync(filePath);
-
+    
     return JSON.parse(contenido);
   } catch (err) {
     console.warn(`❌ Error al leer ${modelo}.json:`, err.message);

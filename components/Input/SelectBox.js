@@ -78,14 +78,15 @@ export default function SelectBox({
             />
 
             {dataArray.map((o, index) => {
-              const itemId = (o.id || o.id_estado || o.value || index).toString();
+              // Priorizar realId si existe, sino usar id, id_estado, value o index
+              const itemValue = (o.realId || o.id || o.id_estado || o.value || index).toString();
               const itemLabel = o.texto || o.nombre || o.label || `Item ${index + 1}`;
-              const uniqueKey = `${labelTitle || 'select'}-${itemId}-${index}`;
+              const uniqueKey = `${labelTitle || 'select'}-${itemValue}-${index}`;
 
               return (
                 <Picker.Item
                   label={itemLabel}
-                  value={itemId}
+                  value={itemValue}
                   key={uniqueKey}
                 />
               );
