@@ -41,10 +41,18 @@ export default function FichaHuevos() {
         leerModeloFS('condiciones-pago'),
       ]);
 
-      const categorias = categoriasData?.rows ?? [];
-      const preguntas = preguntasData?.rows ?? [];
-      const formasPago = formaPagoData?.rows ?? [];
-      const condicionesPago = condicionPagoData?.rows ?? [];
+      // Los datos del JSON son arrays directos, no objetos con propiedad 'rows'
+      const categorias = Array.isArray(categoriasData) ? categoriasData : (categoriasData?.rows ?? []);
+      const preguntas = Array.isArray(preguntasData) ? preguntasData : (preguntasData?.rows ?? []);
+      const formasPago = Array.isArray(formaPagoData) ? formaPagoData : (formaPagoData?.rows ?? []);
+      const condicionesPago = Array.isArray(condicionPagoData) ? condicionPagoData : (condicionPagoData?.rows ?? []);
+
+      // Logs de depuración
+      console.log('📊 Datos cargados:');
+      console.log('  - Categorías:', categorias.length, 'elementos');
+      console.log('  - Preguntas:', preguntas.length, 'elementos');
+      console.log('  - Formas de pago:', formasPago.length, 'elementos');
+      console.log('  - Condiciones de pago:', condicionesPago.length, 'elementos');
 
       const catTransformadas = categorias.map((categoria) => ({
         id_pregunta: `cat_${categoria.id_categoria}`,

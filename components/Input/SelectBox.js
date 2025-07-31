@@ -1,12 +1,15 @@
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
+  Modal,
+  TextInput,
+  FlatList,
+  TouchableOpacity,
+  TouchableWithoutFeedback,
   StyleSheet,
   Platform,
-  TouchableWithoutFeedback,
 } from 'react-native';
-import { Picker } from '@react-native-picker/picker';
 
 export default function SelectBox({
   id,
@@ -14,11 +17,12 @@ export default function SelectBox({
   value,
   options,
   onChange,
-  labelPosition = 'top', // "top" o "left"
+  labelPosition = 'top',
   hasError = false,
   enabled = true,
 }) {
-  const pickerRef = useRef();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [query, setQuery] = useState('');
 
   const dataArray = Array.isArray(options)
     ? options
@@ -28,15 +32,23 @@ export default function SelectBox({
 
   const isLeft = labelPosition === 'left';
 
-  const handleChange = (itemValue) => {
+  const selectedItem = dataArray.find(
+    (o) =>
+      (o.realId || o.id || o.id_estado || o.value || '').toString() ===
+      (value || '').toString()
+  );
+  const selectedLabel = selectedItem?.texto || selectedItem?.nombre || selectedItem?.label || '';
+
+  const filteredOptions = dataArray.filter((o) => {
+    const label = o.texto || o.nombre || o.label || '';
+    return label.toLowerCase().includes(query.toLowerCase());
+  });
+
+  const handleSelect = (itemValue, itemLabel) => {
+    setModalVisible(false);
+    setQuery('');
     if (onChange) {
       onChange(id, itemValue);
-    }
-  };
-
-  const handlePress = () => {
-    if (pickerRef.current && Platform.OS === 'android') {
-      pickerRef.current.focus();
     }
   };
 
@@ -54,7 +66,7 @@ export default function SelectBox({
         </Text>
       ) : null}
 
-      <TouchableWithoutFeedback onPress={handlePress} disabled={!enabled}>
+      <TouchableWithoutFeedback onPress={() => enabled && setModalVisible(true)}>
         <View
           style={[
             styles.pickerWrapper,
@@ -62,38 +74,47 @@ export default function SelectBox({
             hasError && styles.errorBorder,
           ]}
         >
-          <Picker
-            ref={pickerRef}
-            selectedValue={value?.toString() ?? ''}
-            onValueChange={handleChange}
-            enabled={enabled}
-            style={styles.picker}
-            dropdownIconColor="#333"
-          >
-            <Picker.Item
-              label="Seleccionar opción"
-              value=""
-              enabled={false}
-              key="placeholder"
-            />
-
-            {dataArray.map((o, index) => {
-              // Priorizar realId si existe, sino usar id, id_estado, value o index
-              const itemValue = (o.realId || o.id || o.id_estado || o.value || index).toString();
-              const itemLabel = o.texto || o.nombre || o.label || `Item ${index + 1}`;
-              const uniqueKey = `${labelTitle || 'select'}-${itemValue}-${index}`;
-
-              return (
-                <Picker.Item
-                  label={itemLabel}
-                  value={itemValue}
-                  key={uniqueKey}
-                />
-              );
-            })}
-          </Picker>
+          <Text style={selectedLabel ? styles.textValue : styles.placeholder}>
+            {selectedLabel || 'Seleccionar opción'}
+          </Text>
         </View>
       </TouchableWithoutFeedback>
+
+      <Modal visible={modalVisible} animationType="slide" transparent>
+        <View style={styles.modalOverlay}>
+          <View style={styles.modalContainer}>
+            <TextInput
+              placeholder="Buscar..."
+              value={query}
+              onChangeText={setQuery}
+              autoFocus
+              style={styles.searchInput}
+            />
+            <FlatList
+              data={filteredOptions}
+              keyExtractor={(item, index) =>
+                `${labelTitle || 'select'}-${item.id || item.realId || index}`
+              }
+              keyboardShouldPersistTaps="handled"
+              renderItem={({ item, index }) => {
+                const itemValue = (item.realId || item.id || item.id_estado || item.value || index).toString();
+                const itemLabel = item.texto || item.nombre || item.label || `Item ${index + 1}`;
+                return (
+                  <TouchableOpacity
+                    style={styles.optionItem}
+                    onPress={() => handleSelect(itemValue, itemLabel)}
+                  >
+                    <Text>{itemLabel}</Text>
+                  </TouchableOpacity>
+                );
+              }}
+            />
+            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+              <Text style={styles.closeButtonText}>Cerrar</Text>
+            </TouchableOpacity>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }
@@ -130,6 +151,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     height: 48,
     justifyContent: 'center',
+    paddingHorizontal: 10,
   },
   pickerTop: {
     width: '100%',
@@ -137,23 +159,51 @@ const styles = StyleSheet.create({
   pickerLeft: {
     width: '70%',
   },
-  picker: {
-    width: '100%',
+  textValue: {
     color: '#000',
-    paddingLeft: Platform.OS === 'android' ? 4 : 0,
-    ...Platform.select({
-      android: {
-        marginTop: -4,
-      },
-      ios: {
-        fontSize: 16,
-      },
-    }),
+  },
+  placeholder: {
+    color: '#aaa',
   },
   errorText: {
     color: 'red',
   },
   errorBorder: {
     borderColor: 'red',
+  },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.3)',
+    justifyContent: 'center',
+    paddingHorizontal: 20,
+  },
+  modalContainer: {
+    backgroundColor: '#fff',
+    borderRadius: 10,
+    maxHeight: '80%',
+    padding: 20,
+  },
+  searchInput: {
+    borderWidth: 1,
+    borderColor: '#ccc',
+    borderRadius: 8,
+    padding: 10,
+    marginBottom: 10,
+  },
+  optionItem: {
+    paddingVertical: 10,
+    borderBottomWidth: 1,
+    borderBottomColor: '#eee',
+  },
+  closeButton: {
+    marginTop: 10,
+    paddingVertical: 10,
+    alignItems: 'center',
+    backgroundColor: '#f0f0f0',
+    borderRadius: 8,
+  },
+  closeButtonText: {
+    color: '#333',
+    fontWeight: 'bold',
   },
 });
