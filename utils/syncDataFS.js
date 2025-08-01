@@ -62,6 +62,12 @@ export const syncModeloFS = async (modelo, filePath) => {
 };
 
 /**
+ * Lista de modelos que NO deben sincronizarse con la API
+ * (solo usan datos locales)
+ */
+const MODELOS_SOLO_LOCALES = ['clientes'];
+
+/**
  * Sincroniza todos los modelos si hay conexión
  */
 export const syncTodosLosModelosFS = async () => {
@@ -72,6 +78,20 @@ export const syncTodosLosModelosFS = async () => {
     const conectado = netInfo.isConnected;
 
     for (const { modelo, filePath } of getModeloPathPairs()) {
+      // Si el modelo está marcado como solo local, no sincronizar con API
+      if (MODELOS_SOLO_LOCALES.includes(modelo)) {
+        const archivoExiste = await FileSystem.getInfoAsync(filePath);
+        if (!archivoExiste.exists) {
+          await FileSystem.writeAsStringAsync(filePath, '[]', {
+            encoding: FileSystem.EncodingType.UTF8,
+          });
+          console.log(`📱 ${modelo}.json creado vacío (solo local, no sincroniza con API)`);
+        } else {
+          console.log(`📱 ${modelo}.json existe localmente (no sincroniza con API)`);
+        }
+        continue;
+      }
+
       if (conectado) {
         console.log(`🌐 Sincronizando ${modelo} desde la API...`);
         await syncModeloFS(modelo, filePath);
@@ -124,5 +144,39 @@ export const leerModeloFS = async (modelo) => {
   } catch (err) {
     console.warn(`❌ Error al leer ${modelo}.json:`, err.message);
     return [];
+  }
+};
+
+/**
+ * Lee específicamente los clientes locales (garantiza que no use API)
+ */
+export const leerClientesLocales = async () => {
+  console.log('📱 Leyendo clientes desde almacenamiento local únicamente...');
+  return await leerModeloFS('clientes');
+};
+
+/**
+ * Guarda datos de clientes en el almacenamiento local
+ */
+export const guardarClientesLocales = async (clientes) => {
+  const filePath = MODELOS['clientes'];
+  
+  if (!filePath) {
+    throw new Error('Modelo clientes no está configurado');
+  }
+  
+  try {
+    await asegurarDataDir();
+    const json = JSON.stringify(clientes || [], null, 2);
+    
+    await FileSystem.writeAsStringAsync(filePath, json, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    
+    console.log(`✅ Clientes guardados localmente (${Array.isArray(clientes) ? clientes.length : 0} registros)`);
+    return true;
+  } catch (error) {
+    console.warn(`❌ Error al guardar clientes localmente: ${error.message}`);
+    throw error;
   }
 };

@@ -86,6 +86,15 @@ export default function FichaHuevos() {
             ];
           }
 
+          // Agregar opciones específicas para pregunta sobre ser proveedor
+          if (pregunta.descripcion && pregunta.descripcion.includes('¿Estaria dispuesto a darnos la oportunidad de ser su proveedor de huevos?')) {
+            transformedPregunta.tipo = 'select';
+            transformedPregunta.options = [
+              { id: 1, nombre: 'Si' },
+              { id: 2, nombre: 'No' }
+            ];
+          }
+
           return transformedPregunta;
         });
 

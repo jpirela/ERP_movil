@@ -32,8 +32,6 @@ export default function Cliente() {
     puntoReferencia: "",
     diaRecepcion: "",
     tipoComercio: "",
-    formaPago: "",
-    condicionPago: "",
     estado: "",
     municipio: "",
     parroquia: "",
@@ -94,10 +92,6 @@ export default function Cliente() {
   };
 
   const handleEstadoSelect = (id, idEstado) => {
-    console.log('Estado seleccionado:', idEstado, 'Tipo:', typeof idEstado);
-    console.log('ModeloEstados disponibles:', modeloEstados.length);
-    console.log('Primeros 3 IDs del modelo:', modeloEstados.slice(0, 3).map(e => ({ id: e.idEstado, tipo: typeof e.idEstado })));
-    
     updateFormValue('estado', idEstado);
 
     // Reset niveles dependientes primero
@@ -114,45 +108,28 @@ export default function Cliente() {
     if (idEstado && idEstado !== '') {
       // Convertir a número para asegurar comparación correcta
       const idEstadoNum = parseInt(idEstado, 10);
-      console.log('IdEstado convertido a número:', idEstadoNum);
-      
       // Buscar el estado en el modelo completo con comparación flexible
       const estadoCompleto = modeloEstados.find((e) => {
         const match = e.idEstado === idEstado || e.idEstado === idEstadoNum;
-        if (match) {
-          console.log('Match encontrado con estado:', e.idEstado, e.nombre);
-        }
         return match;
       });
-      
-      console.log('Estado encontrado:', estadoCompleto ? { id: estadoCompleto.idEstado, nombre: estadoCompleto.nombre } : 'No encontrado');
       
       if (estadoCompleto) {
         // Llenar municipios del estado seleccionado
         const municipiosDelEstado = estadoCompleto.municipios || [];
         setMunicipios(municipiosDelEstado);
         setEnabledMunicipio(true);
-        console.log('Municipios cargados:', municipiosDelEstado.length);
-        
         // Filtrar ciudades por idEstado usando comparación flexible
         const ciudadesDelEstado = modeloCiudades.filter(ciudad => 
           ciudad.idEstado === idEstado || ciudad.idEstado === idEstadoNum
         );
         setCiudades(ciudadesDelEstado);
         setEnabledCiudad(true);
-        console.log('Ciudades filtradas:', ciudadesDelEstado.length);
-      } else {
-        console.log('No se encontró el estado. Verificando todos los IDs disponibles:');
-        console.log('IDs en modeloEstados:', modeloEstados.map(e => e.idEstado));
       }
     }
   };
 
   const handleMunicipioSelect = (id, idMunicipio) => {
-    console.log('Municipio seleccionado:', idMunicipio, 'Tipo:', typeof idMunicipio);
-    console.log('Municipios disponibles:', municipios.length);
-    console.log('Primeros 3 IDs de municipios:', municipios.slice(0, 3).map(m => ({ id: m.idMunicipio, tipo: typeof m.idMunicipio, nombre: m.nombre })));
-    
     updateFormValue('municipio', idMunicipio);
 
     // Reset parroquias
@@ -163,28 +140,17 @@ export default function Cliente() {
     if (idMunicipio && idMunicipio !== '') {
       // Convertir a número para asegurar comparación correcta
       const idMunicipioNum = parseInt(idMunicipio, 10);
-      console.log('IdMunicipio convertido a número:', idMunicipioNum);
-      
       // Buscar el municipio en la lista actual con comparación flexible
       const municipio = municipios.find((m) => {
         const match = m.idMunicipio === idMunicipio || m.idMunicipio === idMunicipioNum;
-        if (match) {
-          console.log('Match encontrado con municipio:', m.idMunicipio, m.nombre);
-        }
         return match;
       });
-      
-      console.log('Municipio encontrado:', municipio ? { id: municipio.idMunicipio, nombre: municipio.nombre } : 'No encontrado');
       
       if (municipio) {
         // Llenar parroquias del municipio seleccionado
         const parroquiasDelMunicipio = municipio.parroquias || [];
         setParroquias(parroquiasDelMunicipio);
         setEnabledParroquia(true);
-        console.log('Parroquias cargadas:', parroquiasDelMunicipio.length);
-      } else {
-        console.log('No se encontró el municipio. Verificando todos los IDs disponibles:');
-        console.log('IDs en municipios:', municipios.map(m => m.idMunicipio));
       }
     }
   };

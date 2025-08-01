@@ -10,7 +10,12 @@ import {
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useNavigation } from '@react-navigation/native';
-import { leerModeloFS } from '../utils/syncDataFS'; // ✅ NUEVA importación
+import { leerClientesLocales, guardarClientesLocales } from '../utils/syncDataFS'; // ✅ Funciones específicas para clientes locales
+
+// Generador de UUID simple y confiable para React Native
+const generateUUID = () => {
+  return 'row_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+};
 
 const icons = {
   editar: <MaterialCommunityIcons name="account-edit-outline" size={24} color="gray" />,
@@ -24,7 +29,7 @@ const Inicio = () => {
 
   useEffect(() => {
     const cargarClientes = async () => {
-      const data = await leerModeloFS('clientes');
+      const data = await leerClientesLocales(); // 📱 Solo datos locales, no API
       setClientes(data);
     };
 
@@ -43,7 +48,7 @@ const Inicio = () => {
   };
 
   const handleEditar = (idCliente) => {
-    console.log('Editar cliente con ID:', idCliente);
+    // TODO: Implementar navegación a pantalla de edición
   };
 
   const handleEliminar = (idCliente) => {
@@ -54,8 +59,15 @@ const Inicio = () => {
         { text: 'No', style: 'cancel' },
         {
           text: 'Sí',
-          onPress: () => {
-            setClientes(prev => prev.filter(cliente => cliente.idCliente !== idCliente));
+          onPress: async () => {
+            const nuevosClientes = clientes.filter(cliente => cliente.idCliente !== idCliente);
+            setClientes(nuevosClientes);
+            // 📱 Guardar cambios localmente
+            try {
+              await guardarClientesLocales(nuevosClientes);
+            } catch (error) {
+              console.warn('Error al guardar clientes localmente:', error);
+            }
           },
         },
       ],
@@ -86,19 +98,28 @@ const Inicio = () => {
 
       {/* Lista de clientes */}
       <ScrollView style={styles.scrollArea} contentContainerStyle={styles.scrollContent}>
-        {filteredClientes.map(cliente => (
-          <View key={cliente.idCliente} style={styles.row}>
-            <Text style={[styles.cell, { flex: 1 }]}>{cliente.nombre}</Text>
-            <View style={[styles.actionsCell, { width: '25%' }]}>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => handleEditar(cliente.idCliente)}>
-                {icons.editar}
-              </TouchableOpacity>
-              <TouchableOpacity style={styles.actionBtn} onPress={() => handleEliminar(cliente.idCliente)}>
-                {icons.eliminar}
-              </TouchableOpacity>
+        {filteredClientes.map(cliente => {
+          // Generar un identificador único para key
+          const uniqueKey = generateUUID();
+          
+          return (
+            <View 
+              key={uniqueKey} 
+              id={cliente.idCliente?.toString()} 
+              style={styles.row}
+            >
+              <Text style={[styles.cell, { flex: 1 }]}>{cliente.nombre}</Text>
+              <View style={[styles.actionsCell, { width: '25%' }]}>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => handleEditar(cliente.idCliente)}>
+                  {icons.editar}
+                </TouchableOpacity>
+                <TouchableOpacity style={styles.actionBtn} onPress={() => handleEliminar(cliente.idCliente)}>
+                  {icons.eliminar}
+                </TouchableOpacity>
+              </View>
             </View>
-          </View>
-        ))}
+          );
+        })}
         {filteredClientes.length === 0 && (
           <View style={styles.emptyRow}>
             <Text style={styles.emptyText}>No se encontraron clientes</Text>

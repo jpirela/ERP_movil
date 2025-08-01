@@ -89,7 +89,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   labelLeft: {
-    width: '30%',
+    width: '40%',
     marginRight: 8,
   },
   input: {
@@ -104,7 +104,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   inputLeft: {
-    width: '70%',
+    width: '60%',
   },
   errorText: {
     color: 'red',

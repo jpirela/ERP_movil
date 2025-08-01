@@ -141,7 +141,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   labelLeft: {
-    width: '30%',
+    width: '40%',
     marginRight: 8,
   },
   pickerWrapper: {
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   pickerLeft: {
-    width: '70%',
+    width: '60%',
   },
   textValue: {
     color: '#000',
