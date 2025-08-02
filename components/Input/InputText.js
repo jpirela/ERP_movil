@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
-const InputText = ({
+const InputText = forwardRef(({
   id,
   labelTitle,
   value,
@@ -10,7 +10,7 @@ const InputText = ({
   type = 'text',
   labelPosition = 'top', // "top" o "left"
   hasError = false,
-}) => {
+}, ref) => {
   const getSecureEntry = () => type === 'password';
 
   const getKeyboardType = () => {
@@ -48,6 +48,7 @@ const InputText = ({
         </Text>
       ) : null}
       <TextInput
+        ref={ref}
         style={[
           styles.input,
           isLeft ? styles.inputLeft : styles.inputTop,
@@ -63,7 +64,7 @@ const InputText = ({
       />
     </View>
   );
-};
+});
 
 export default InputText;
 

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import {
   StyleSheet,
   ScrollView,
@@ -15,7 +15,7 @@ import SelectBox from '../components/Input/SelectBox';
 
 import { leerModeloFS } from '../utils/syncDataFS';
 
-export default function Cliente() {
+const Cliente = forwardRef((props, ref) => {
   const INITIAL_OBJECT = {
     nombre: "",
     razonSocial: "",
@@ -58,6 +58,55 @@ export default function Cliente() {
   const [enabledCiudad, setEnabledCiudad] = useState(false);
   const [enabledMunicipio, setEnabledMunicipio] = useState(false);
   const [enabledParroquia, setEnabledParroquia] = useState(false);
+
+  // Estado para manejo de errores de validación
+  const [camposConError, setCamposConError] = useState({});
+
+  // Referencias para todos los campos
+  const fieldRefs = {
+    nombre: useRef(),
+    razonSocial: useRef(),
+    rif: useRef(),
+    contacto: useRef(),
+    correo: useRef(),
+    telefono: useRef(),
+    direccion: useRef(),
+    estado: useRef(),
+    municipio: useRef(),
+    parroquia: useRef(),
+    ciudad: useRef(),
+  };
+
+  // Exponer datos y funciones al componente padre
+  useImperativeHandle(ref, () => ({
+    getData: () => object,
+    validateData: () => {
+      const requiredFields = ['nombre', 'razonSocial', 'rif', 'contacto', 'correo', 'telefono', 'direccion', 'estado', 'municipio', 'parroquia', 'ciudad'];
+      const errores = {};
+      requiredFields.forEach(field => {
+        if (!object[field] || object[field].trim() === '') {
+          errores[field] = true;
+        }
+      });
+      setCamposConError(errores);
+      
+      // Enfocar el primer campo con error
+      if (Object.keys(errores).length > 0) {
+        const primerCampoConError = Object.keys(errores)[0];
+        const fieldRef = fieldRefs[primerCampoConError];
+        if (fieldRef && fieldRef.current) {
+          setTimeout(() => {
+            if (fieldRef.current.focus) {
+              fieldRef.current.focus();
+            }
+          }, 100);
+        }
+      }
+      
+      return Object.keys(errores).length === 0;
+    },
+    clearErrors: () => setCamposConError({})
+  }));
 
   useEffect(() => {
     const cargarDatos = async () => {
@@ -172,16 +221,34 @@ export default function Cliente() {
       >
         <View>
           {/* Inputs de texto */}
-          <InputText id="nombre" value={object.nombre} placeholder="Nombre del negocio" onChange={updateFormValue} />
-          <InputText id="razonSocial" value={object.razonSocial} placeholder="Razón Social" onChange={updateFormValue} />
-          <InputText id="rif" value={object.rif} placeholder="RIF o CI" onChange={updateFormValue} />
-          <InputText id="contacto" value={object.contacto} placeholder="Persona de contacto" onChange={updateFormValue} />
-          <InputText id="correo" value={object.correo} placeholder="Correo electrónico" type="email" onChange={updateFormValue} />
-          <InputText id="telefono" value={object.telefono} placeholder="Teléfono" type="phone" onChange={updateFormValue} />
+          <InputText ref={fieldRefs.nombre} id="nombre" value={object.nombre} placeholder="Nombre del negocio" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.nombre} />
+          <InputText ref={fieldRefs.razonSocial} id="razonSocial" value={object.razonSocial} placeholder="Razón Social" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.razonSocial} />
+          <InputText ref={fieldRefs.rif} id="rif" value={object.rif} placeholder="RIF o CI" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.rif} />
+          <InputText ref={fieldRefs.contacto} id="contacto" value={object.contacto} placeholder="Persona de contacto" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.contacto} />
+          <InputText ref={fieldRefs.correo} id="correo" value={object.correo} placeholder="Correo electrónico" type="email" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.correo} />
+          <InputText ref={fieldRefs.telefono} id="telefono" value={object.telefono} placeholder="Teléfono" type="phone" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.telefono} />
           <InputText id="contacto2" value={object.contacto2} placeholder="Persona de contacto 2" onChange={updateFormValue} />
           <InputText id="correo2" value={object.correo2} placeholder="Correo electrónico 2" type="email" onChange={updateFormValue} />
           <InputText id="telefono2" value={object.telefono2} placeholder="Teléfono 2" type="phone" onChange={updateFormValue} />
-          <TextArea id="direccion" value={object.direccion} placeholder="Dirección" onChange={updateFormValue} />
+          <TextArea ref={fieldRefs.direccion} id="direccion" value={object.direccion} placeholder="Dirección" onChange={(id, value) => { updateFormValue(id, value); fieldRefs[id].current.focus(); }} hasError={camposConError.direccion} />
+          <InputText id="ubicacionMap" value={object.ubicacionMap} placeholder="URL Google Maps" onChange={updateFormValue} />
+          <InputText id="local" value={object.local} placeholder="Local" onChange={updateFormValue} />
+          <InputText id="puntoReferencia" value={object.puntoReferencia} placeholder="Punto de referencia" onChange={updateFormValue} />
+          <InputText id="diaRecepcion" value={object.diaRecepcion} placeholder="Día de recepción" onChange={updateFormValue} />
+          <InputText id="tipoComercio" value={object.tipoComercio} placeholder="Tipo de comercio" onChange={updateFormValue} />
+          <InputText id="facebook" value={object.facebook} placeholder="Facebook" onChange={updateFormValue} />
+          <InputText id="instagram" value={object.instagram} placeholder="Instagram" onChange={updateFormValue} />
+          <InputText id="tiktok" value={object.tiktok} placeholder="Tiktok" onChange={updateFormValue} />
+          <InputText id="paginaWeb" value={object.paginaWeb} placeholder="Página web" onChange={updateFormValue} />
+          <InputText ref={fieldRefs.razonSocial} id="razonSocial" value={object.razonSocial} placeholder="Razón Social" onChange={updateFormValue} hasError={camposConError.razonSocial} />
+          <InputText ref={fieldRefs.rif} id="rif" value={object.rif} placeholder="RIF o CI" onChange={updateFormValue} hasError={camposConError.rif} />
+          <InputText ref={fieldRefs.contacto} id="contacto" value={object.contacto} placeholder="Persona de contacto" onChange={updateFormValue} hasError={camposConError.contacto} />
+          <InputText ref={fieldRefs.correo} id="correo" value={object.correo} placeholder="Correo electrónico" type="email" onChange={updateFormValue} hasError={camposConError.correo} />
+          <InputText ref={fieldRefs.telefono} id="telefono" value={object.telefono} placeholder="Teléfono" type="phone" onChange={updateFormValue} hasError={camposConError.telefono} />
+          <InputText id="contacto2" value={object.contacto2} placeholder="Persona de contacto 2" onChange={updateFormValue} />
+          <InputText id="correo2" value={object.correo2} placeholder="Correo electrónico 2" type="email" onChange={updateFormValue} />
+          <InputText id="telefono2" value={object.telefono2} placeholder="Teléfono 2" type="phone" onChange={updateFormValue} />
+          <TextArea ref={fieldRefs.direccion} id="direccion" value={object.direccion} placeholder="Dirección" onChange={updateFormValue} hasError={camposConError.direccion} />
           <InputText id="ubicacionMap" value={object.ubicacionMap} placeholder="URL Google Maps" onChange={updateFormValue} />
           <InputText id="local" value={object.local} placeholder="Local" onChange={updateFormValue} />
           <InputText id="puntoReferencia" value={object.puntoReferencia} placeholder="Punto de referencia" onChange={updateFormValue} />
@@ -193,6 +260,7 @@ export default function Cliente() {
           <InputText id="paginaWeb" value={object.paginaWeb} placeholder="Página web" onChange={updateFormValue} />
 
           <SelectBox
+            ref={fieldRefs.estado}
             id="estado"
             value={object.estado}
             labelTitle="Estado"
@@ -203,9 +271,11 @@ export default function Cliente() {
               nombre: e.nombre,
             }))}
             enabled={estados.length > 0}
+            hasError={camposConError.estado}
           />
 
           <SelectBox
+            ref={fieldRefs.municipio}
             id="municipio"
             value={object.municipio}
             labelTitle="Municipio"
@@ -216,9 +286,11 @@ export default function Cliente() {
               nombre: m.nombre,
             }))}
             enabled={enabledMunicipio}
+            hasError={camposConError.municipio}
           />
 
           <SelectBox
+            ref={fieldRefs.parroquia}
             id="parroquia"
             value={object.parroquia}
             labelTitle="Parroquia"
@@ -229,9 +301,11 @@ export default function Cliente() {
               nombre: p.nombre,
             }))}
             enabled={enabledParroquia}
+            hasError={camposConError.parroquia}
           />
 
           <SelectBox
+            ref={fieldRefs.ciudad}
             id="ciudad"
             value={object.ciudad}
             labelTitle="Ciudad"
@@ -242,6 +316,7 @@ export default function Cliente() {
               nombre: c.nombre,
             }))}
             enabled={enabledCiudad}
+            hasError={camposConError.ciudad}
           />
 
           <StatusBar style="auto" />
@@ -249,7 +324,7 @@ export default function Cliente() {
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   flex: {
@@ -268,3 +343,5 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
 });
+
+export default Cliente;

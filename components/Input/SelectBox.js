@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, forwardRef, useImperativeHandle } from 'react';
 import {
   View,
   Text,
@@ -11,7 +11,7 @@ import {
   Platform,
 } from 'react-native';
 
-export default function SelectBox({
+const SelectBox = forwardRef(({
   id,
   labelTitle,
   value,
@@ -20,9 +20,18 @@ export default function SelectBox({
   labelPosition = 'top',
   hasError = false,
   enabled = true,
-}) {
+}, ref) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState('');
+
+  // Exponer función focus para poder enfocar el SelectBox desde el padre
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      if (enabled) {
+        setModalVisible(true);
+      }
+    }
+  }));
 
   const dataArray = Array.isArray(options)
     ? options
@@ -117,7 +126,9 @@ export default function SelectBox({
       </Modal>
     </View>
   );
-}
+});
+
+export default SelectBox;
 
 const styles = StyleSheet.create({
   container: {

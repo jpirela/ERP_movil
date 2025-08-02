@@ -1,9 +1,10 @@
-import { useState } from 'react';
-import { View, useWindowDimensions, StyleSheet, Text, TouchableOpacity } from 'react-native';
+import { useState, useRef } from 'react';
+import { View, useWindowDimensions, StyleSheet, Text, TouchableOpacity, Alert } from 'react-native';
 import { TabView, TabBar } from 'react-native-tab-view';
 import FichaCliente from './FichaCliente';
 import FichaHuevos from './FichaHuevos';
 import { useNavigation } from '@react-navigation/native';
+import { guardarNuevoCliente, guardarRespuestas } from '../utils/syncDataFS';
 
 export default function AgregarCliente() {
   const layout = useWindowDimensions();
@@ -14,19 +15,58 @@ export default function AgregarCliente() {
     { key: 'huevos', title: 'Ficha Huevos' },
   ]);
 
+  const clienteRef = useRef();
+  const huevosRef = useRef();
+
   const renderScene = ({ route }) => {
     switch (route.key) {
       case 'cliente':
-        return <FichaCliente />;
+        return <FichaCliente ref={clienteRef} />;
       case 'huevos':
-        return <FichaHuevos />;
+        return <FichaHuevos ref={huevosRef} />;
       default:
         return null;
     }
   };
 
-  const handleGuardar = () => {
-    navigation.goBack();
+  const handleGuardar = async () => {
+    try {
+      const clienteValid = clienteRef.current?.validateData();
+      const huevosValid = huevosRef.current?.validateData();
+
+      if (!clienteValid || !huevosValid) {
+        Alert.alert("Faltan datos por recolectar");
+        return;
+      }
+
+      // Limpiar errores si la validación es exitosa
+      clienteRef.current?.clearErrors();
+      huevosRef.current?.clearErrors();
+
+      // Obtener datos
+      const clienteData = clienteRef.current?.getData();
+      const huevosData = huevosRef.current?.getData();
+
+      // 1. Guardar cliente y obtener idCliente
+      const idCliente = await guardarNuevoCliente(clienteData);
+
+      // 2. Preparar respuestas con estructura correcta
+      const respuestasFormateadas = {
+        categorias: huevosData.categorias,
+        preguntas: huevosData.preguntas,
+        formaPago: huevosData.formaPago,
+        condicionPago: huevosData.condicionPago
+      };
+
+      // 3. Guardar respuestas en Respuestas.json usando idCliente como índice
+      await guardarRespuestas(idCliente, respuestasFormateadas);
+
+      Alert.alert("Datos guardados exitosamente");
+      navigation.goBack();
+    } catch (error) {
+      console.error('Error al guardar:', error);
+      Alert.alert("Error al guardar los datos");
+    }
   };
 
   const renderTabBar = (props) => (

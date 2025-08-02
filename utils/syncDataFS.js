@@ -31,6 +31,32 @@ const getModeloPathPairs = () => {
   }));
 };
 
+const RESPUESTAS_PATH = `${DATA_DIR}Respuestas.json`;
+
+/**
+ * Guarda respuestas en Respuestas.json
+ */
+export const guardarRespuestas = async (idCliente, respuestas) => {
+  try {
+    await asegurarDataDir();
+    const respuestasInfo = await FileSystem.getInfoAsync(RESPUESTAS_PATH);
+    let respuestasData = {};
+    if (respuestasInfo.exists) {
+      const contenido = await FileSystem.readAsStringAsync(RESPUESTAS_PATH);
+      respuestasData = JSON.parse(contenido);
+    }
+    respuestasData[idCliente] = respuestas;
+    const json = JSON.stringify(respuestasData, null, 2);
+    await FileSystem.writeAsStringAsync(RESPUESTAS_PATH, json, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    console.log(`✅ Respuestas guardadas para el cliente ${idCliente}`);
+  } catch (error) {
+    console.warn(`❌ Error al guardar respuestas: ${error.message}`);
+    throw error;
+  }
+};
+
 /**
  * Sincroniza un modelo: descarga desde API o crea archivo vacío si no hay datos
  */
@@ -156,8 +182,90 @@ export const leerClientesLocales = async () => {
 };
 
 /**
- * Guarda datos de clientes en el almacenamiento local
+ * Guarda un nuevo cliente en el almacenamiento local y retorna el idCliente generado
  */
+export const guardarNuevoCliente = async (clienteData) => {
+  const filePath = MODELOS['clientes'];
+  
+  if (!filePath) {
+    throw new Error('Modelo clientes no está configurado');
+  }
+  
+  try {
+    await asegurarDataDir();
+    
+    // Leer clientes existentes
+    const clientesExistentes = await leerClientesLocales();
+    
+    // Generar nuevo idCliente secuencial
+    const maxId = clientesExistentes.reduce((max, cliente) => {
+      const id = parseInt(cliente.idCliente) || 0;
+      return id > max ? id : max;
+    }, 0);
+    const nuevoIdCliente = maxId + 1;
+    
+    // Crear nuevo cliente con idCliente
+    const nuevoCliente = {
+      idCliente: nuevoIdCliente.toString(),
+      fechaCreacion: new Date().toISOString(),
+      ...clienteData
+    };
+    
+    // Agregar a la lista
+    const clientesActualizados = [...clientesExistentes, nuevoCliente];
+    
+    const json = JSON.stringify(clientesActualizados, null, 2);
+    
+    await FileSystem.writeAsStringAsync(filePath, json, {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    
+    console.log(`✅ Cliente guardado con ID: ${nuevoIdCliente}`);
+    return nuevoIdCliente.toString();
+  } catch (error) {
+    console.warn(`❌ Error al guardar cliente: ${error.message}`);
+    throw error;
+  }
+};
+
+/**
+ * Guarda datos de clientes en el almacenamiento local (función original para compatibilidad)
+ */
+/**
+ * Elimina las respuestas de un cliente específico por su idCliente
+ */
+export const eliminarRespuestasCliente = async (idCliente) => {
+  const filePath = RESPUESTAS_PATH;
+
+  try {
+    await asegurarDataDir();
+    const respuestasInfo = await FileSystem.getInfoAsync(filePath);
+    if (!respuestasInfo.exists) {
+      console.log('📄 No se encontró el archivo de respuestas');
+      return;
+    }
+
+    const contenido = await FileSystem.readAsStringAsync(filePath);
+    let respuestasData = JSON.parse(contenido);
+
+    // Verificar si existen respuestas para este cliente
+    if (respuestasData[idCliente]) {
+      delete respuestasData[idCliente];
+      
+      await FileSystem.writeAsStringAsync(filePath, JSON.stringify(respuestasData, null, 2), {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      
+      console.log(`✅ Respuestas del cliente ${idCliente} eliminadas correctamente`);
+    } else {
+      console.log(`ℹ️ No se encontraron respuestas para el cliente ${idCliente}`);
+    }
+  } catch (error) {
+    console.warn(`❌ Error al eliminar respuestas del cliente ${idCliente}:`, error.message);
+    throw error;
+  }
+};
+
 export const guardarClientesLocales = async (clientes) => {
   const filePath = MODELOS['clientes'];
   

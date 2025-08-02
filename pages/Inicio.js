@@ -9,8 +9,9 @@ import {
   Alert,
 } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
-import { useNavigation } from '@react-navigation/native';
-import { leerClientesLocales, guardarClientesLocales } from '../utils/syncDataFS'; // ✅ Funciones específicas para clientes locales
+import { useNavigation, useFocusEffect } from '@react-navigation/native';
+import { useCallback } from 'react';
+import { leerClientesLocales, guardarClientesLocales, eliminarRespuestasCliente } from '../utils/syncDataFS'; // ✅ Funciones específicas para clientes locales
 
 // Generador de UUID simple y confiable para React Native
 const generateUUID = () => {
@@ -23,18 +24,26 @@ const icons = {
 };
 
 const Inicio = () => {
+  const [selectedRowId, setSelectedRowId] = useState(null); // Estado para fila seleccionada
   const [clientes, setClientes] = useState([]);
   const [searchText, setSearchText] = useState('');
   const navigation = useNavigation();
 
-  useEffect(() => {
-    const cargarClientes = async () => {
-      const data = await leerClientesLocales(); // 📱 Solo datos locales, no API
-      setClientes(data);
-    };
-
-    cargarClientes();
+  const cargarClientes = useCallback(async () => {
+    const data = await leerClientesLocales(); // 📱 Solo datos locales, no API
+    setClientes(data);
   }, []);
+
+  useEffect(() => {
+    cargarClientes();
+  }, [cargarClientes]);
+
+  // Recargar datos cuando la pantalla tome foco (al volver de AgregarCliente)
+  useFocusEffect(
+    useCallback(() => {
+      cargarClientes();
+    }, [cargarClientes])
+  );
 
   const filteredClientes = useMemo(() => {
     if (!searchText.trim()) return clientes;
@@ -60,13 +69,20 @@ const Inicio = () => {
         {
           text: 'Sí',
           onPress: async () => {
-            const nuevosClientes = clientes.filter(cliente => cliente.idCliente !== idCliente);
-            setClientes(nuevosClientes);
-            // 📱 Guardar cambios localmente
             try {
+              // 🔄 PASO 1: Eliminar respuestas relacionadas PRIMERO
+              console.log(`🔄 Iniciando eliminación del cliente ${idCliente}...`);
+              await eliminarRespuestasCliente(idCliente);
+              
+              // 🔄 PASO 2: Eliminar cliente DESPUÉS
+              const nuevosClientes = clientes.filter(cliente => cliente.idCliente !== idCliente);
+              setClientes(nuevosClientes);
               await guardarClientesLocales(nuevosClientes);
+              
+              console.log(`✅ Cliente ${idCliente} y sus respuestas eliminados correctamente`);
             } catch (error) {
-              console.warn('Error al guardar clientes localmente:', error);
+              console.warn('Error al eliminar cliente y respuestas:', error);
+              Alert.alert('Error', 'No se pudo completar la eliminación');
             }
           },
         },
@@ -74,6 +90,7 @@ const Inicio = () => {
       { cancelable: true }
     );
   };
+
 
   return (
     <View style={styles.container}>
@@ -102,11 +119,13 @@ const Inicio = () => {
           // Generar un identificador único para key
           const uniqueKey = generateUUID();
           
-          return (
-            <View 
+return (
+            <TouchableOpacity 
               key={uniqueKey} 
               id={cliente.idCliente?.toString()} 
-              style={styles.row}
+              style={[styles.row, cliente.idCliente === selectedRowId && styles.activeRow]}
+              onPress={() => setSelectedRowId(cliente.idCliente)}
+              activeOpacity={0.7}
             >
               <Text style={[styles.cell, { flex: 1 }]}>{cliente.nombre}</Text>
               <View style={[styles.actionsCell, { width: '25%' }]}>
@@ -117,7 +136,7 @@ const Inicio = () => {
                   {icons.eliminar}
                 </TouchableOpacity>
               </View>
-            </View>
+            </TouchableOpacity>
           );
         })}
         {filteredClientes.length === 0 && (
@@ -188,6 +207,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 8,
     paddingVertical: 10,
+  },
+  activeRow: {
+    backgroundColor: '#f0f0f0', // Gris claro para la fila seleccionada
   },
   cell: {
     fontSize: 16,

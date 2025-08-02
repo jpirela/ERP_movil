@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, forwardRef, useImperativeHandle, useRef } from 'react';
 import {
   ScrollView,
   StyleSheet,
@@ -15,17 +15,46 @@ import Divider from '../components/Input/Divider';
 
 import { leerModeloFS } from '../utils/syncDataFS';
 
-export default function FichaHuevos() {
+const FichaHuevos = forwardRef((props, ref) => {
   const [categoriasTransformadas, setCategoriasTransformadas] = useState([]);
   const [preguntasTransformadas, setPreguntasTransformadas] = useState([]);
   const [formaPagoTransformada, setFormaPagoTransformada] = useState([]);
   const [condicionPagoTransformada, setCondicionPagoTransformada] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [cantidadProveedores, setCantidadProveedores] = useState('1');
 
   const [categorias, setCategorias] = useState({});
   const [preguntas, setPreguntas] = useState({});
   const [formaPago, setFormaPago] = useState({});
   const [condicionPago, setCondicionPago] = useState({});
+
+  const [camposConError, setCamposConError] = useState({});
+  const fieldRefs = useRef({});
+
+  const setFieldRef = (id, ref) => {
+    fieldRefs.current[id] = ref;
+  };
+
+  useImperativeHandle(ref, () => ({
+    getData: () => ({
+      categorias,
+      preguntas,
+      formaPago,
+      condicionPago,
+      cantidadProveedores,
+    }),
+    validateData: () => {
+      const errores = {};
+      Object.entries(preguntas).forEach(([key, value]) => {
+        if (!value || value.toString().trim() === '') {
+          errores[key] = true;
+        }
+      });
+      setCamposConError(errores);
+      return Object.keys(errores).length === 0;
+    },
+    clearErrors: () => setCamposConError({}),
+  }));
 
   useEffect(() => {
     const cargarModelos = async () => {
@@ -41,69 +70,72 @@ export default function FichaHuevos() {
         leerModeloFS('condiciones-pago'),
       ]);
 
-      // Los datos del JSON son arrays directos, no objetos con propiedad 'rows'
       const categorias = Array.isArray(categoriasData) ? categoriasData : (categoriasData?.rows ?? []);
       const preguntas = Array.isArray(preguntasData) ? preguntasData : (preguntasData?.rows ?? []);
       const formasPago = Array.isArray(formaPagoData) ? formaPagoData : (formaPagoData?.rows ?? []);
       const condicionesPago = Array.isArray(condicionPagoData) ? condicionPagoData : (condicionPagoData?.rows ?? []);
 
-
       const catTransformadas = categorias
-        .filter(categoria => categoria && categoria.idCategoria != null)
-        .map((categoria) => ({
-          id_pregunta: `cat_${categoria.idCategoria}`,
+        .filter(c => c && c.idCategoria != null)
+        .sort((a, b) => a.idCategoria - b.idCategoria)
+        .map(c => ({
+          id_pregunta: `cat_${c.idCategoria}`,
           tipo: 'text',
-          descripcion: `${categoria.nombre || 'Sin nombre'} (${categoria.descripcion || 'Sin descripción'})`,
+          descripcion: `${c.nombre || 'Sin nombre'} (${c.descripcion || 'Sin descripción'})`,
           labelPosition: 'left',
         }));
 
       const pregTransformadas = preguntas
-        .filter(pregunta => pregunta && pregunta.idPregunta != null)
-        .map((pregunta) => {
-          let transformedPregunta = {
-            id_pregunta: pregunta.idPregunta,
-            tipo: pregunta.tipo || 'text',
-            descripcion: pregunta.descripcion || 'Sin descripción',
-            options: pregunta.options,
-            labelPosition: 'top',
+        .filter(p => p && p.idPregunta != null)
+        .sort((a, b) => a.idPregunta - b.idPregunta)
+        .map(p => {
+          const transformed = {
+            id_pregunta: p.idPregunta,
+            tipo: p.tipo || 'text',
+            descripcion: p.descripcion || 'Sin descripción',
+            options: p.options,
+            labelPosition: /Proveedor\s+\d+/i.test(p.descripcion) ? 'left' : 'top',
           };
 
-          // Agregar opciones específicas para pregunta sobre flete
-          if (pregunta.descripcion && pregunta.descripcion.includes('¿Paga flete?')) {
-            transformedPregunta.tipo = 'select';
-            transformedPregunta.options = [
+          if (p.descripcion?.includes('¿Cuantos proveedores de huevos tiene?')) {
+            transformed.tipo = 'select';
+            transformed.options = Array.from({ length: 5 }, (_, i) => ({ id: `${i + 1}`, nombre: `${i + 1}` }));
+          }
+
+          if (p.descripcion?.includes('¿Paga flete?')) {
+            transformed.tipo = 'select';
+            transformed.options = [
               { id: 1, nombre: 'Si' },
-              { id: 2, nombre: 'No' }
+              { id: 2, nombre: 'No' },
             ];
           }
 
-          // Agregar opciones específicas para pregunta sobre búsqueda de huevos
-          if (pregunta.descripcion && pregunta.descripcion.includes('¿Usted busca los huevos o se los traen?')) {
-            transformedPregunta.tipo = 'select';
-            transformedPregunta.options = [
+          if (p.descripcion?.includes('¿Usted busca los huevos o se los traen?')) {
+            transformed.tipo = 'select';
+            transformed.options = [
               { id: 1, nombre: 'Me los traen' },
-              { id: 2, nombre: 'Los busco' }
+              { id: 2, nombre: 'Los busco' },
             ];
           }
 
-          // Agregar opciones específicas para pregunta sobre ser proveedor
-          if (pregunta.descripcion && pregunta.descripcion.includes('¿Estaria dispuesto a darnos la oportunidad de ser su proveedor de huevos?')) {
-            transformedPregunta.tipo = 'select';
-            transformedPregunta.options = [
+          if (p.descripcion?.includes('¿Estaria dispuesto a darnos la oportunidad de ser su proveedor de huevos?')) {
+            transformed.tipo = 'select';
+            transformed.options = [
               { id: 1, nombre: 'Si' },
-              { id: 2, nombre: 'No' }
+              { id: 2, nombre: 'No' },
             ];
           }
 
-          return transformedPregunta;
+          return transformed;
         });
 
       const formaPagoTransformada = formasPago
-        .filter(item => item && item.idFormaPago != null)
-        .map((item) => ({
-          id_pregunta: `forma_${item.idFormaPago}`,
+        .filter(i => i && i.idFormaPago != null)
+        .sort((a, b) => a.idFormaPago - b.idFormaPago)
+        .map(i => ({
+          id_pregunta: `forma_${i.idFormaPago}`,
           tipo: 'select',
-          descripcion: item.descripcion || 'Sin descripción',
+          descripcion: i.descripcion || 'Sin descripción',
           labelPosition: 'left',
           options: [
             { id: 1, nombre: 'Si' },
@@ -112,31 +144,39 @@ export default function FichaHuevos() {
         }));
 
       const condPagoTransformada = condicionesPago
-        .filter(item => item && item.idCondicionPago != null)
-        .map((item) => ({
-          id_pregunta: `cond_${item.idCondicionPago}`,
+        .filter(i => i && i.idCondicionPago != null)
+        .sort((a, b) => a.idCondicionPago - b.idCondicionPago)
+        .map(i => ({
+          id_pregunta: `cond_${i.idCondicionPago}`,
           tipo: 'text',
-          descripcion: item.descripcion || 'Sin descripción',
+          descripcion: i.descripcion || 'Sin descripción',
           labelPosition: 'left',
         }));
-
 
       setCategoriasTransformadas(catTransformadas);
       setPreguntasTransformadas(pregTransformadas);
       setFormaPagoTransformada(formaPagoTransformada);
       setCondicionPagoTransformada(condPagoTransformada);
 
-      // Inicializar valores de formularios
-      setCategorias(catTransformadas.reduce((acc, item) => ({ ...acc, [item.id_pregunta]: '' }), {}));
-      setPreguntas(pregTransformadas.reduce((acc, item) => ({ ...acc, [item.id_pregunta]: '' }), {}));
-      setFormaPago(formaPagoTransformada.reduce((acc, item) => ({ ...acc, [item.id_pregunta]: '' }), {}));
-      setCondicionPago(condPagoTransformada.reduce((acc, item) => ({ ...acc, [item.id_pregunta]: '' }), {}));
+      setCategorias(catTransformadas.reduce((acc, i) => ({ ...acc, [i.id_pregunta]: '' }), {}));
+      setPreguntas(pregTransformadas.reduce((acc, i) => ({ ...acc, [i.id_pregunta]: '' }), {}));
+      setFormaPago(formaPagoTransformada.reduce((acc, i) => ({ ...acc, [i.id_pregunta]: '' }), {}));
+      setCondicionPago(condPagoTransformada.reduce((acc, i) => ({ ...acc, [i.id_pregunta]: '' }), {}));
 
       setLoading(false);
     };
 
     cargarModelos();
   }, []);
+
+  const filtrarPreguntasProveedores = (pregs) => {
+    return pregs.filter(p => {
+      if (!p.descripcion || !/Proveedor\s+\d+/i.test(p.descripcion)) return true;
+      const match = p.descripcion.match(/Proveedor\s+(\d+)/i);
+      const n = match ? parseInt(match[1]) : 0;
+      return n <= parseInt(cantidadProveedores);
+    });
+  };
 
   const renderPregunta = (pregunta, formData, updateFn) => {
     const {
@@ -148,37 +188,37 @@ export default function FichaHuevos() {
     } = pregunta;
 
     const handleChange = (id, value) => {
-      updateFn((prev) => ({
-        ...prev,
-        [id]: value,
-      }));
+      updateFn(prev => ({ ...prev, [id]: value }));
+      if (labelTitle?.includes('¿Cuantos proveedores de huevos tiene?')) {
+        setCantidadProveedores(value);
+      }
     };
 
-    if (type === 'select') {
-      const resolvedOptions = Array.isArray(options) ? options : [];
-      return (
-        <SelectBox
-          key={id}
-          id={id}
-          value={formData[id]}
-          labelTitle={labelTitle}
-          onChange={handleChange}
-          options={resolvedOptions}
-          labelPosition={labelPosition}
-        />
-      );
-    }
+    const resolvedOptions = Array.isArray(options) ? options : [];
 
-    return (
+    return type === 'select' ? (
+      <SelectBox
+        key={id}
+        id={id}
+        value={formData[id]}
+        labelTitle={labelTitle}
+        onChange={handleChange}
+        options={resolvedOptions}
+        labelPosition={labelPosition}
+        hasError={camposConError[id]}
+      />
+    ) : (
       <InputText
         key={id}
         id={id}
         value={formData[id]}
         labelTitle={labelTitle}
         placeholder=""
+        ref={ref => setFieldRef(id, ref)}
         onChange={handleChange}
         type={type}
         labelPosition={labelPosition}
+        hasError={camposConError[id]}
       />
     );
   };
@@ -199,34 +239,26 @@ export default function FichaHuevos() {
     >
       <ScrollView
         contentContainerStyle={styles.container}
-        showsVerticalScrollIndicator={true}
+        showsVerticalScrollIndicator
         keyboardShouldPersistTaps="handled"
       >
-        <Divider text="Tipos de Huevo" containerStyle={{ marginVertical: 10 }} />
-        <View>
-          {categoriasTransformadas.map((p) => renderPregunta(p, categorias, setCategorias))}
-        </View>
+        <Divider text="¿Cuántas cajas compra a la semana?" containerStyle={{ marginVertical: 10 }} />
+        {categoriasTransformadas.map(p => renderPregunta(p, categorias, setCategorias))}
 
-        <Divider text="Preguntas" containerStyle={{ marginVertical: 10 }} />
-        <View>
-          {preguntasTransformadas.map((p) => renderPregunta(p, preguntas, setPreguntas))}
-        </View>
+        <Divider text="¿Cómo realiza su pedido?" containerStyle={{ marginVertical: 10 }} />
+        {filtrarPreguntasProveedores(preguntasTransformadas).map(p => renderPregunta(p, preguntas, setPreguntas))}
 
-        <Divider text="Forma de Pago" containerStyle={{ marginVertical: 10 }} />
-        <View>
-          {formaPagoTransformada.map((p) => renderPregunta(p, formaPago, setFormaPago))}
-        </View>
+        <Divider text="¿Cuál es su forma de pago?" containerStyle={{ marginVertical: 10 }} />
+        {formaPagoTransformada.map(p => renderPregunta(p, formaPago, setFormaPago))}
 
-        <Divider text="Condición de Pago" containerStyle={{ marginVertical: 10 }} />
-        <View>
-          {condicionPagoTransformada.map((p) => renderPregunta(p, condicionPago, setCondicionPago))}
-        </View>
+        <Divider text="¿Cuál es su condición de pago?" containerStyle={{ marginVertical: 10 }} />
+        {condicionPagoTransformada.map(p => renderPregunta(p, condicionPago, setCondicionPago))}
 
         <StatusBar style="auto" />
       </ScrollView>
     </KeyboardAvoidingView>
   );
-}
+});
 
 const styles = StyleSheet.create({
   flex: {
@@ -242,3 +274,5 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
 });
+
+export default FichaHuevos;

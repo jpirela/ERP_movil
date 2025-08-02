@@ -1,7 +1,7 @@
-import React from 'react';
+import React, { forwardRef } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
-export default function TextArea({
+const TextArea = forwardRef(({
   id,
   labelTitle,
   value = '',
@@ -10,7 +10,7 @@ export default function TextArea({
   numberOfLines = 4,
   labelPosition = 'top', // 'top' o 'left'
   hasError = false,
-}) {
+}, ref) => {
   const isLeft = labelPosition === 'left';
 
   return (
@@ -28,6 +28,7 @@ export default function TextArea({
       )}
 
       <TextInput
+        ref={ref}
         style={[
           styles.textArea,
           isLeft ? styles.textAreaLeft : styles.textAreaTop,
@@ -42,7 +43,9 @@ export default function TextArea({
       />
     </View>
   );
-}
+});
+
+export default TextArea;
 
 const styles = StyleSheet.create({
   container: {

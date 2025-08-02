@@ -1,12 +1,30 @@
 // app.config.js
 export default {
   expo: {
-    name: 'ERP Ventas',
-    slug: 'erp-ventas',
+    name: 'SGV Ventas',
+    slug: 'sgv-ventas',
     version: '1.0.0',
     extra: {
-      URL_BASE: 'http://192.168.1.101:8080/api',
-      MODELOS: ['clientes', 'estados', 'ciudades', 'preguntas', 'categorias', 'formas-pago', 'condiciones-pago'],
+      URL_BASE: 'http://192.168.1.106:8080/api',
+      MODELOS: [
+        'clientes',
+        'estados',
+        'ciudades',
+        'categorias',
+        'preguntas',
+        'formas-pago',
+        'condiciones-pago'
+      ],
+      ENDPOINTS: [
+        'clientes-categorias',
+        'respuestas',
+        'clientes-forma-pago',
+        'clientes-condicion-pago'
+      ],
+      AUTENTICACION: {
+        user: 'admin',
+        password: 'admin123',
+      },
     },
   },
 };
