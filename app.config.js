@@ -16,6 +16,7 @@ export default {
         'condiciones-pago'
       ],
       RESPUESTAS: [
+        'clientes',
         'clientes-categorias',
         'respuestas',
         'clientes-forma-pago',
