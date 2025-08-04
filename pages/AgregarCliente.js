@@ -30,48 +30,95 @@ export default function AgregarCliente() {
   };
 
   const handleGuardar = async () => {
-    try {
-      const clienteValid = clienteRef.current?.validateData();
-      const huevosValid = huevosRef.current?.validateData();
+  try {
+    const clienteValid = clienteRef.current?.validateData();
+    const huevosValid = huevosRef.current?.validateData();
 
-      if (!clienteValid || !huevosValid) {
-        const clienteErrores = clienteRef.current?.getErrores();
-        const huevosErrores = huevosRef.current?.getErrores();
-        console.log('Errores en Ficha Cliente:', clienteErrores);
-        console.log('Errores en Ficha Huevos:', huevosErrores);
-        Alert.alert("Faltan datos por recolectar");
-        return;
-      }
-
-      // Limpiar errores si la validación es exitosa
-      clienteRef.current?.clearErrors();
-      huevosRef.current?.clearErrors();
-
-      // Obtener datos
-      const clienteData = clienteRef.current?.getData();
-      const huevosData = huevosRef.current?.getData();
-
-      // 1. Guardar cliente y obtener idCliente
-      const idCliente = await guardarNuevoCliente(clienteData);
-
-      // 2. Preparar respuestas con estructura correcta
-      const respuestasFormateadas = {
-        categorias: huevosData.categorias,
-        preguntas: huevosData.preguntas,
-        formaPago: huevosData.formaPago,
-        condicionPago: huevosData.condicionPago
-      };
-
-      // 3. Guardar respuestas en Respuestas.json usando idCliente como índice
-      await guardarRespuestas(idCliente, respuestasFormateadas);
-
-      Alert.alert("Datos guardados exitosamente");
-      navigation.goBack();
-    } catch (error) {
-      console.error('Error al guardar:', error);
-      Alert.alert("Error al guardar los datos");
+    if (!clienteValid || !huevosValid) {
+      const clienteErrores = clienteRef.current?.getErrores();
+      const huevosErrores = huevosRef.current?.getErrores();
+      console.log('Errores en Ficha Cliente:', clienteErrores);
+      console.log('Errores en Ficha Huevos:', huevosErrores);
+      Alert.alert("Faltan datos por recolectar");
+      return;
     }
-  };
+
+    // Limpiar errores si la validación es exitosa
+    clienteRef.current?.clearErrors();
+    huevosRef.current?.clearErrors();
+
+    // Obtener datos
+    const clienteData = clienteRef.current?.getData();
+    const huevosData = huevosRef.current?.getData();
+    
+    console.log('\n🔍 === DEBUG: PROCESO DE GUARDADO ===');
+    console.log('\n📋 DATOS DEL CLIENTE:');
+    console.log(JSON.stringify(clienteData, null, 2));
+    
+    console.log('\n🥚 DATOS DE HUEVOS:');
+    console.log(JSON.stringify(huevosData, null, 2));
+
+    // Guardar cliente y obtener idCliente
+    console.log('\n💾 Guardando cliente...');
+    const idCliente = await guardarNuevoCliente(clienteData);
+    console.log('✅ Cliente guardado con ID:', idCliente);
+
+    // Transformar datos al formato esperado
+    const transformarDatos = (huevosData) => {
+      const categorias = Object.entries(huevosData.categorias || {}).map(([key, value]) => {
+        const id = parseInt(key.replace('cat_', ''), 10);
+        return { idCategoria: id, cantidad: value };
+      });
+
+      const preguntas = Object.entries(huevosData.preguntas || {}).map(([key, value]) => {
+        return { idPregunta: parseInt(key, 10), respuesta: value };
+      });
+
+      const formaPago = Object.entries(huevosData.formaPago || {})
+        .filter(([_, value]) => value === '1')
+        .map(([key]) => {
+          const id = parseInt(key.replace('forma_', ''), 10);
+          return { idFormaPago: id };
+        });
+
+      const condicionIdStr = huevosData.condicionPago?.['condicion_pago_select'];
+      const condicionId = condicionIdStr ? parseInt(condicionIdStr.replace('condpago_', ''), 10) : null;
+
+      const condicionPago = condicionId
+        ? {
+            idCondicionPago: condicionId,
+            ...(condicionId === 2
+              ? { diaCredito: parseInt(huevosData.diasCredito || '0', 10) }
+              : { diaContado: 0 }),
+          }
+        : {};
+
+      return {
+        categorias,
+        preguntas,
+        'forma-pago': formaPago,
+        'condicion-pago': condicionPago,
+      };
+    };
+
+    const respuestasFormateadas = transformarDatos(huevosData);
+    
+    console.log('\n📝 RESPUESTAS FORMATEADAS:');
+    console.log(JSON.stringify(respuestasFormateadas, null, 2));
+
+    // Guardar respuestas
+    console.log('\n💾 Guardando respuestas...');
+    await guardarRespuestas(idCliente, respuestasFormateadas);
+    console.log('✅ Respuestas guardadas correctamente');
+    console.log('🔚 === FIN DEBUG: PROCESO DE GUARDADO ===\n');
+
+    Alert.alert("Datos guardados exitosamente");
+    navigation.goBack();
+  } catch (error) {
+    console.error('Error al guardar:', error);
+    Alert.alert("Error al guardar los datos");
+  }
+};
 
   const renderTabBar = (props) => (
     <View style={styles.tabHeader}>

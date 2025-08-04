@@ -119,7 +119,7 @@ const Inicio = () => {
           // Generar un identificador único para key
           const uniqueKey = generateUUID();
           
-return (
+          return (
             <TouchableOpacity 
               key={uniqueKey} 
               id={cliente.idCliente?.toString()} 
