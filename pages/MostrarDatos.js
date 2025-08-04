@@ -26,21 +26,17 @@ const leerRespuestasDirecto = async () => {
     
     const respuestasInfo = await FileSystem.getInfoAsync(RESPUESTAS_PATH);
     if (!respuestasInfo.exists) {
-      console.log('📄 Archivo Respuestas.json no encontrado');
       return {};
     }
     
     const contenido = await FileSystem.readAsStringAsync(RESPUESTAS_PATH);
     if (!contenido || contenido.trim() === '') {
-      console.log('📄 Archivo Respuestas.json está vacío');
       return {};
     }
     
     const datos = JSON.parse(contenido);
-    console.log(`✅ Respuestas.json leído correctamente - ${Object.keys(datos).length} clientes`);
     return datos;
   } catch (error) {
-    console.warn(`❌ Error al leer Respuestas.json:`, error.message);
     return {};
   }
 };
@@ -93,24 +89,8 @@ export default function MostrarDatos() {
         setClienteData(cliente);
 
         const respuestas = respuestasCompletas || {};
-        const clavesRespuestas = Object.keys(respuestas);
-        console.log(`🔎 respuestas.json contiene ${clavesRespuestas.length} registros`);
-
         const respuestasCliente = respuestas[idCliente];
-        console.log(`🎯 Coincidencias con cliente ${idCliente}: ${respuestasCliente ? 1 : 0}`);
-        if (!respuestasCliente) {
-          console.log('⚠️ No se encontraron respuestas para este cliente.');
-        }
-
         setRespuestasData(respuestasCliente);
-        
-        console.log('\n\n📁 === CONTENIDO COMPLETO DE CLIENTES.JSON ===');
-        console.log(JSON.stringify(clientesData, null, 2));
-        console.log('🔚 === FIN DEL CONTENIDO DE CLIENTES.JSON ===\n\n');
-        
-        console.log('\n\n📁 === CONTENIDO COMPLETO DE RESPUESTAS.JSON ===');
-        console.log(JSON.stringify(respuestasCompletas, null, 2));
-        console.log('🔚 === FIN DEL CONTENIDO DE RESPUESTAS.JSON ===\n\n');
 
         setLoading(false);
       } catch (error) {

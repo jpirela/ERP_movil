@@ -15,7 +15,7 @@ export default {
         'formas-pago',
         'condiciones-pago'
       ],
-      ENDPOINTS: [
+      RESPUESTAS: [
         'clientes-categorias',
         'respuestas',
         'clientes-forma-pago',
