@@ -3,6 +3,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { createStackNavigator } from '@react-navigation/stack';
 import Inicio from './pages/Inicio';
 import AgregarCliente from './pages/AgregarCliente';
+import MostrarDatos from './pages/MostrarDatos';
 import { View, Image, StyleSheet } from 'react-native';
 import { syncTodosLosModelosFS } from './utils/syncDataFS';
 
@@ -30,6 +31,7 @@ export default function App() {
       >
         <Stack.Screen name="Inicio" component={Inicio} />
         <Stack.Screen name="AgregarCliente" component={AgregarCliente} />
+        <Stack.Screen name="MostrarDatos" component={MostrarDatos} />
       </Stack.Navigator>
     </NavigationContainer>
   );

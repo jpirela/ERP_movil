@@ -57,7 +57,7 @@ const Inicio = () => {
   };
 
   const handleEditar = (idCliente) => {
-    // TODO: Implementar navegación a pantalla de edición
+    navigation.navigate('MostrarDatos', { idCliente });
   };
 
   const handleEliminar = (idCliente) => {
