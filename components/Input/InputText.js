@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
 const InputText = forwardRef(({
@@ -8,42 +8,29 @@ const InputText = forwardRef(({
   placeholder,
   onChange,
   type = 'text',
-  labelPosition = 'top', // "top" o "left"
+  labelPosition = 'top',
   hasError = false,
 }, ref) => {
+  const [focused, setFocused] = useState(false);
+
   const getSecureEntry = () => type === 'password';
 
   const getKeyboardType = () => {
     switch (type) {
-      case 'email':
-        return 'email-address';
+      case 'email': return 'email-address';
       case 'numeric':
-      case 'number':
-        return 'numeric';
-      case 'phone':
-        return 'phone-pad';
-      default:
-        return 'default';
+      case 'number': return 'numeric';
+      case 'phone': return 'phone-pad';
+      default: return 'default';
     }
   };
 
   const isLeft = labelPosition === 'left';
 
   return (
-    <View
-      style={[
-        styles.container,
-        isLeft ? styles.leftAlign : styles.topAlign,
-      ]}
-    >
+    <View style={[styles.container, isLeft ? styles.leftAlign : styles.topAlign]}>
       {labelTitle ? (
-        <Text
-          style={[
-            styles.label,
-            isLeft ? styles.labelLeft : styles.labelTop,
-            hasError && styles.errorText,
-          ]}
-        >
+        <Text style={[styles.label, isLeft ? styles.labelLeft : styles.labelTop, hasError && styles.errorText]}>
           {labelTitle}
         </Text>
       ) : null}
@@ -52,6 +39,7 @@ const InputText = forwardRef(({
         style={[
           styles.input,
           isLeft ? styles.inputLeft : styles.inputTop,
+          focused && styles.focusedBorder,
           hasError && styles.errorBorder,
         ]}
         value={value}
@@ -59,6 +47,8 @@ const InputText = forwardRef(({
         secureTextEntry={getSecureEntry()}
         keyboardType={getKeyboardType()}
         onChangeText={(text) => onChange(id, text)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
         autoCapitalize="none"
         autoCorrect={false}
       />
@@ -112,5 +102,8 @@ const styles = StyleSheet.create({
   },
   errorBorder: {
     borderColor: 'red',
+  },
+  focusedBorder: {
+    borderColor: '#007AFF',
   },
 });

@@ -27,6 +27,7 @@ const FichaHuevos = forwardRef((props, ref) => {
   const [preguntas, setPreguntas] = useState({});
   const [formaPago, setFormaPago] = useState({});
   const [condicionPago, setCondicionPago] = useState({});
+  const [diasCredito, setDiasCredito] = useState('');
 
   const [camposConError, setCamposConError] = useState({});
   const fieldRefs = useRef({});
@@ -34,26 +35,61 @@ const FichaHuevos = forwardRef((props, ref) => {
   const setFieldRef = (id, ref) => {
     fieldRefs.current[id] = ref;
   };
-
+  
   useImperativeHandle(ref, () => ({
     getData: () => ({
       categorias,
       preguntas,
       formaPago,
       condicionPago,
+      diasCredito,
       cantidadProveedores,
     }),
     validateData: () => {
       const errores = {};
-      Object.entries(preguntas).forEach(([key, value]) => {
+      
+      // Solo validar preguntas de proveedores que están activas
+      const preguntasActivas = filtrarPreguntasProveedores(preguntasTransformadas);
+      
+      preguntasActivas.forEach(pregunta => {
+        const key = pregunta.id_pregunta;
+        const value = preguntas[key];
         if (!value || value.toString().trim() === '') {
           errores[key] = true;
         }
       });
+      
       setCamposConError(errores);
       return Object.keys(errores).length === 0;
     },
-    clearErrors: () => setCamposConError({}),
+    clearErrors: () => {
+      setCamposConError({});
+      setDiasCredito('');
+    },
+    getErrores: () => {
+      const camposFaltantes = [];
+      
+      // Solo revisar preguntas de proveedores que están activas
+      const preguntasActivas = filtrarPreguntasProveedores(preguntasTransformadas);
+      
+      preguntasActivas.forEach(pregunta => {
+        const key = pregunta.id_pregunta;
+        const value = preguntas[key];
+        if (!value || value.toString().trim() === '') {
+          camposFaltantes.push(`pregunta_${key}: ${pregunta.descripcion}`);
+        }
+      });
+      
+      // Revisar días de crédito si la condición de pago es 2
+      const condicionSeleccionada = condicionPago['condicion_pago_select'];
+      if (condicionSeleccionada === '2') {
+        if (!diasCredito || diasCredito.toString().trim() === '') {
+          camposFaltantes.push('dias_credito: Días de Crédito');
+        }
+      }
+      
+      return camposFaltantes;
+    },
   }));
 
   useEffect(() => {
@@ -143,15 +179,20 @@ const FichaHuevos = forwardRef((props, ref) => {
           ],
         }));
 
-      const condPagoTransformada = condicionesPago
-        .filter(i => i && i.idCondicionPago != null)
-        .sort((a, b) => a.idCondicionPago - b.idCondicionPago)
-        .map(i => ({
-          id_pregunta: `cond_${i.idCondicionPago}`,
-          tipo: 'text',
-          descripcion: i.descripcion || 'Sin descripción',
-          labelPosition: 'left',
-        }));
+      const condPagoTransformada = [{
+        id_pregunta: 'condicion_pago_select',
+        tipo: 'select',
+        descripcion: '¿Cuál es su condición de pago?',
+        labelPosition: 'top',
+        options: condicionesPago
+          .filter(i => i && i.idCondicionPago != null)
+          .sort((a, b) => a.idCondicionPago - b.idCondicionPago)
+          .map(i => ({
+            id: `condpago_${i.idCondicionPago}`,
+            realId: i.idCondicionPago,
+            nombre: i.descripcion || 'Sin descripción'
+          }))
+      }];
 
       setCategoriasTransformadas(catTransformadas);
       setPreguntasTransformadas(pregTransformadas);
@@ -253,6 +294,20 @@ const FichaHuevos = forwardRef((props, ref) => {
 
         <Divider text="¿Cuál es su condición de pago?" containerStyle={{ marginVertical: 10 }} />
         {condicionPagoTransformada.map(p => renderPregunta(p, condicionPago, setCondicionPago))}
+        
+        {/* Campo de Días de Crédito - aparece solo si condición de pago es 2 */}
+        {condicionPago['condicion_pago_select'] === '2' && (
+          <InputText
+            id="dias_credito"
+            value={diasCredito}
+            labelTitle="Días de Crédito"
+            placeholder="Ingrese los días de crédito"
+            onChange={(id, value) => setDiasCredito(value)}
+            type="number"
+            labelPosition="top"
+            hasError={camposConError['dias_credito']}
+          />
+        )}
 
         <StatusBar style="auto" />
       </ScrollView>

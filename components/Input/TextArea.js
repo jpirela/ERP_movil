@@ -1,45 +1,43 @@
-import React, { forwardRef } from 'react';
+import React, { forwardRef, useState } from 'react';
 import { View, Text, TextInput, StyleSheet } from 'react-native';
 
 const TextArea = forwardRef(({
   id,
   labelTitle,
-  value = '',
+  value,
   placeholder,
   onChange,
-  numberOfLines = 4,
-  labelPosition = 'top', // 'top' o 'left'
+  labelPosition = 'top',
   hasError = false,
 }, ref) => {
+  const [focused, setFocused] = useState(false);
+
   const isLeft = labelPosition === 'left';
 
   return (
     <View style={[styles.container, isLeft ? styles.leftAlign : styles.topAlign]}>
-      {labelTitle && (
-        <Text
-          style={[
-            styles.label,
-            isLeft ? styles.labelLeft : styles.labelTop,
-            hasError && styles.errorText,
-          ]}
-        >
+      {labelTitle ? (
+        <Text style={[styles.label, isLeft ? styles.labelLeft : styles.labelTop, hasError && styles.errorText]}>
           {labelTitle}
         </Text>
-      )}
-
+      ) : null}
       <TextInput
         ref={ref}
-        style={[
-          styles.textArea,
-          isLeft ? styles.textAreaLeft : styles.textAreaTop,
-          { height: numberOfLines * 24 },
-          hasError && styles.errorBorder,
-        ]}
-        placeholder={placeholder}
-        value={value}
-        onChangeText={(text) => onChange(id, text)}
         multiline
-        textAlignVertical="top"
+        numberOfLines={4}
+        style={[
+          styles.textarea,
+          isLeft ? styles.textareaLeft : styles.textareaTop,
+          hasError && styles.errorBorder,
+          focused && styles.focusedBorder,
+        ]}
+        value={value}
+        placeholder={placeholder}
+        onChangeText={(text) => onChange(id, text)}
+        onFocus={() => setFocused(true)}
+        onBlur={() => setFocused(false)}
+        autoCapitalize="none"
+        autoCorrect={false}
       />
     </View>
   );
@@ -58,6 +56,7 @@ const styles = StyleSheet.create({
   leftAlign: {
     flexDirection: 'row',
     alignItems: 'flex-start',
+    width: '100%',
   },
   label: {
     fontWeight: 'bold',
@@ -68,27 +67,32 @@ const styles = StyleSheet.create({
     width: '100%',
   },
   labelLeft: {
-    marginRight: 12,
-    width: 80,
+    width: '40%',
+    marginRight: 8,
+    marginTop: 6,
   },
-  textArea: {
+  textarea: {
     borderWidth: 1,
     borderColor: '#ccc',
     padding: 8,
     borderRadius: 4,
     fontSize: 16,
     backgroundColor: '#fff',
+    textAlignVertical: 'top',
   },
-  textAreaTop: {
+  textareaTop: {
     width: '100%',
   },
-  textAreaLeft: {
-    flex: 1,
+  textareaLeft: {
+    width: '60%',
   },
   errorText: {
     color: 'red',
   },
   errorBorder: {
     borderColor: 'red',
+  },
+  focusedBorder: {
+    borderColor: '#007AFF',
   },
 });

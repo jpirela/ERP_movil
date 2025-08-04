@@ -35,6 +35,10 @@ export default function AgregarCliente() {
       const huevosValid = huevosRef.current?.validateData();
 
       if (!clienteValid || !huevosValid) {
+        const clienteErrores = clienteRef.current?.getErrores();
+        const huevosErrores = huevosRef.current?.getErrores();
+        console.log('Errores en Ficha Cliente:', clienteErrores);
+        console.log('Errores en Ficha Huevos:', huevosErrores);
         Alert.alert("Faltan datos por recolectar");
         return;
       }

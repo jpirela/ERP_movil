@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { View, Text, Switch, StyleSheet } from 'react-native';
 
 export default function CheckBox({
@@ -10,12 +10,21 @@ export default function CheckBox({
   hasError = false,
 }) {
   const isLeft = labelPosition === 'left';
+  const [isFocused, setIsFocused] = useState(false);
+
+  const handleValueChange = (val) => {
+    setIsFocused(true);
+    onChange(id, val);
+    setTimeout(() => setIsFocused(false), 1500); // Simula un efecto de "enfoque"
+  };
 
   return (
     <View
       style={[
         styles.container,
         isLeft ? styles.leftAlign : styles.topAlign,
+        isFocused && styles.focused,
+        hasError && styles.errorBorder,
       ]}
     >
       {labelTitle ? (
@@ -32,7 +41,7 @@ export default function CheckBox({
 
       <Switch
         value={value}
-        onValueChange={(val) => onChange(id, val)}
+        onValueChange={handleValueChange}
         style={isLeft ? styles.switchLeft : styles.switchTop}
       />
     </View>
@@ -42,7 +51,16 @@ export default function CheckBox({
 const styles = StyleSheet.create({
   container: {
     marginBottom: 16,
-    alignItems: 'flex-start',
+    padding: 8,
+    borderWidth: 1,
+    borderColor: 'transparent',
+    borderRadius: 8,
+  },
+  focused: {
+    borderColor: '#007bff',
+  },
+  errorBorder: {
+    borderColor: 'red',
   },
   topAlign: {
     flexDirection: 'column',

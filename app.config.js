@@ -5,7 +5,7 @@ export default {
     slug: 'sgv-ventas',
     version: '1.0.0',
     extra: {
-      URL_BASE: 'http://192.168.1.106:8080/api',
+      URL_BASE: 'http://192.168.1.108:8080/api',
       MODELOS: [
         'clientes',
         'estados',

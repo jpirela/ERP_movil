@@ -23,21 +23,22 @@ const SelectBox = forwardRef(({
 }, ref) => {
   const [modalVisible, setModalVisible] = useState(false);
   const [query, setQuery] = useState('');
+  const [focused, setFocused] = useState(false);
 
-  // Exponer función focus para poder enfocar el SelectBox desde el padre
   useImperativeHandle(ref, () => ({
     focus: () => {
       if (enabled) {
         setModalVisible(true);
+        setFocused(true);
       }
-    }
+    },
   }));
 
   const dataArray = Array.isArray(options)
     ? options
     : options && typeof options === 'object'
-    ? Object.values(options)
-    : [];
+      ? Object.values(options)
+      : [];
 
   const isLeft = labelPosition === 'left';
 
@@ -55,6 +56,7 @@ const SelectBox = forwardRef(({
 
   const handleSelect = (itemValue, itemLabel) => {
     setModalVisible(false);
+    setFocused(false);
     setQuery('');
     if (onChange) {
       onChange(id, itemValue);
@@ -64,23 +66,25 @@ const SelectBox = forwardRef(({
   return (
     <View style={[styles.container, isLeft ? styles.leftAlign : styles.topAlign]}>
       {labelTitle ? (
-        <Text
-          style={[
-            styles.label,
-            isLeft ? styles.labelLeft : styles.labelTop,
-            hasError && styles.errorText,
-          ]}
-        >
+        <Text style={[styles.label, isLeft ? styles.labelLeft : styles.labelTop, hasError && styles.errorText]}>
           {labelTitle}
         </Text>
       ) : null}
 
-      <TouchableWithoutFeedback onPress={() => enabled && setModalVisible(true)}>
+      <TouchableWithoutFeedback
+        onPress={() => {
+          if (enabled) {
+            setModalVisible(true);
+            setFocused(true);
+          }
+        }}
+      >
         <View
           style={[
             styles.pickerWrapper,
             isLeft ? styles.pickerLeft : styles.pickerTop,
             hasError && styles.errorBorder,
+            focused && styles.focusedBorder,
           ]}
         >
           <Text style={selectedLabel ? styles.textValue : styles.placeholder}>
@@ -118,7 +122,13 @@ const SelectBox = forwardRef(({
                 );
               }}
             />
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={styles.closeButton}>
+            <TouchableOpacity
+              onPress={() => {
+                setModalVisible(false);
+                setFocused(false);
+              }}
+              style={styles.closeButton}
+            >
               <Text style={styles.closeButtonText}>Cerrar</Text>
             </TouchableOpacity>
           </View>
@@ -181,6 +191,9 @@ const styles = StyleSheet.create({
   },
   errorBorder: {
     borderColor: 'red',
+  },
+  focusedBorder: {
+    borderColor: '#007AFF',
   },
   modalOverlay: {
     flex: 1,
